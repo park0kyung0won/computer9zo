@@ -7,11 +7,11 @@
 #define REGISTER_SIZE 16
 #define TRACE_FILENAME "trace.out"
 
-void fetch(int *pc, int fetch_width, int inst_length, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
+void fetch(int *pc, int fetch_width, int inst_length, struct INSTRUCTION *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
 {
 	int fetch_num = (fetch_width > (*idx).blank) ? (*idx).blank : fetch_width;
 	int i;
-	for (i = 0; i < fetch_num && pc < inst_length; i++)
+	for (i = 0; i < fetch_num && (*pc) < inst_length; i++)
 	{
 		(fetch_queue[(*idx).tail]).op = (inst[*pc]).inst_type;
 		(fetch_queue[(*idx).tail]).dest = (inst[*pc]).destination;
