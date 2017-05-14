@@ -62,11 +62,12 @@ void execution();
 // 를 operand의 Q로 가지고 있는 RS의 인스트럭션한테
 // 값을 전달해주고 그 operand를 Q에서 V로 바꾼다
 // delta_n_rs -= 제거한 인스트럭션 갯수;
-void rs_retire()
+void rs_retire(struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle)
 {
-	if ((--rs[idx].time_left) < 0)//타이머를 1줄이고, 만약 0 이하라면 (ex 완료) ROB의 state를 C
+	if ( (--((*rs).time_left) ) < 0)//타이머를 1줄이고, 만약 0 이하라면 (ex 완료) ROB의 state를 C
 	{//ex completed in this step
-		rob[rs[idx].index_rob].status = 'C';
+		rob[(*rs).index_rob].status = 'C';
+		is_completed_this_cycle[(*rs).index_rob] = true
 	}
 }
 
