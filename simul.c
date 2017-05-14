@@ -247,7 +247,7 @@ void simul_ooo(struct Config* config)
 		if (debug != None)
 		{
 			fprintf(report,"= Cycle %d\n", status.cycle);
-
+			printf("= Cycle %d\n", status.cycle);
 			if (debug == RSROB)
 			{
 				for (int idx = 0; idx < size_rs; ++idx)

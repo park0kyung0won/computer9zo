@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 	//
 	for (int idx_conf = 1; idx_conf < argc ; ++idx_conf)
 	{
-		printf("conf_%d : %s \n");
+		printf("conf_%d : %s \n",idx_conf, argv[idx_conf]);
 		configprinter(configs + idx_conf);
 		simul_ooo(configs + idx_conf);//simulate
 	}
