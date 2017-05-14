@@ -5,7 +5,7 @@
 #include "isnt.c"
 
 #define REGISTER_SIZE 16
-
+#define TRACE_FILENAME "trace.out"
 
 void fetch(int *pc, int fetch_width, int inst_length, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
 {
@@ -169,7 +169,9 @@ void simul_ooo(struct Config* config)
 
 	struct RAT	rat[REGISTER_SIZE];// Architectural Register File
 
-
+	int Instruction_length;
+	struct Instruction* inst_arr;
+	Instruction_length = make_inst_array(TRACE_FILENAME, inst_arr);
 	//
 	// Starting Simulation
 	//
@@ -180,8 +182,7 @@ void simul_ooo(struct Config* config)
 	int issue_num;
 	bool fetch_eof = false;
 	int pc = 0;
-	//int Instruction_length 
-	//struct Instruction *inst = read;
+	
 
 	do
 	{//do one cycle
@@ -210,7 +211,7 @@ void simul_ooo(struct Config* config)
 			if (rs[idx].is_valid == false)
 			{//만약 빈 공간이라면,
 				if (decode_num < N && index_rob.blank != 0 && 
-					((!fetch_eof)|| index_fq.size !=getblank(&index_fq)) )
+					(pc!= Instruction_length || index_fq.size !=getblank(&index_fq)) )
 				{// rob가 다차지 않았다면 , N개를 decode하지 않았다면 
 				 // fetch가 다 떨어지지 않았다면 디코드 최대치에 다다를때까지 디코드한다.
 					++decode_num;
@@ -230,9 +231,7 @@ void simul_ooo(struct Config* config)
 		}
 
 		//in fetch queue
-
-
-		fetch_eof = fetch(int fetch_width, inst_mem, fetch_queue, index_fq);
+		fetch(&pc, N, Instruction_length, inst_arr, fetch_queue, &index_fq);
 
 
 	} while ( (index_fq.blank != index_fq.size) || (index_rob.blank != index_rob.size) );

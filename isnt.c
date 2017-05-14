@@ -60,6 +60,36 @@ int read_instruction(FILE *in_filename, struct Instruction *out_inst)
  }
 }
 
+
+int make_inst_array(char* filename, struct Instruction *out_inst)
+{
+	int lines = 0;
+	char tmp;
+	char buffer[30];
+	FILE* p_file;
+	p_file = fopen(filename, "r");
+
+	while (!feof(p_file))
+	{
+		tmp = fgetc(p_file);
+		if (tmp == '\n')
+		{
+			lines++;
+		}
+	}
+	fclose(p_file);
+	FILE* pfile;
+	pfile = fopen(filename, "r");
+	out_inst = (struct Instruction*)malloc(sizeof(struct Instruction)*lines);
+
+	for (int i = 0; i<lines; i++)
+	{
+		read_instruction(pfile, &out_inst[i]);
+	}
+	fclose(pfile);
+	return lines;
+}
+
 int configreader(char* config_filename, struct Config* out_config )
 {
 	char buffer[5];
