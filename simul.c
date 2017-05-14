@@ -158,10 +158,10 @@ void simul_ooo(struct Config* config)
 	int N = (*config).Width;//set fetch = decode = issue width
 
 	struct FQ* fetch_queue = malloc(sizeof(struct FQ) * 2 * N);//set fetch_queue
-	struct Cycle_index index_fq = {0,0,0,2*N};//fetch_queue의 인덱스
+	struct Cycle_index index_fq = {0,0,0,2*N,0};//fetch_queue의 인덱스
 
 	struct ROB* rob = malloc(sizeof(struct ROB) * ((*config).ROB_size));
-	struct Cycle_index index_rob = { 0,0,0,(*config).ROB_size };//rob의 인덱스
+	struct Cycle_index index_rob = { 0,0,0,(*config).ROB_size,0 };//rob의 인덱스
 	bool* is_completed_this_cycle = malloc(sizeof(bool) * (*config).ROB_size);//이번 사이클 업데이트
 
 	struct RS*	rs = malloc( sizeof(struct RS) * ((*config).Res_size) );
@@ -174,8 +174,8 @@ void simul_ooo(struct Config* config)
 	Instruction_length = make_inst_array(TRACE_FILENAME, inst_arr);
 	
 	char output_title[50];
-	sprintf_s(output_title, 50, "%d_%d_%d_%d_output.out", config->Dump, config->Width, config->ROB_size, config->Res_size);
-	FILE* report = fopen(output_title, 'w');
+	sprintf(output_title, "%d_%d_%d_%d_output.out", config->Dump, config->Width, config->ROB_size, config->Res_size);
+	FILE* report = fopen(output_title, "w");
 	//
 	// Starting Simulation
 	//

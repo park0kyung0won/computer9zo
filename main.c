@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "isnt.c"
+#include "isnt1.c"
 
 //#include "read.h" //read config and instruction
 //#include "simul.h"//func related simulation
