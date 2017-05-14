@@ -49,7 +49,7 @@ void rs_retire();
 // delta_n_rob -= 제거한 인스트럭션 갯수;
 void commit();
 
-int N; // OoO 윈도우 사이즈를 의미함
+int N; 
 
 int n_fq; // fetch queue에 인스트럭션이 몇 개나 들어있는지 알려준다
 int delta_n_fq; // n_fq의 변화를 의미한다. 파이프라인 구현을 위함.
