@@ -35,22 +35,19 @@ void simul_ooo(struct Config* config)
 	
 	int N = (*config).width;//set fetch = decode = issue width
 
-	struct FI* fetch_queue = malloc( sizeof(struct FI) * N )//set fetch_queue
+	struct FI* fetch_queue = malloc(sizeof(struct FI) * N);//set fetch_queue
 
-	struct {
-		int start = 0;
-		int end = 0;
-		int num_elem = 0;
-		struct ROB data* = malloc( sizeof(struct ROB) * ((*config).rob_size) );
-	} rob;
+	struct ROB* rob = malloc(sizeof(struct ROB) * ((*config).rob_size));
 	
 	struct RS*	rs = malloc( sizeof(struct RS) * ((*config).rs_size) );
 	
 	struct RAT	rat[REGISTER_SIZE];
 
+
 	//
 	// Starting Simulation
 	//
+
 	do
 	{//do one cycle
 
@@ -90,7 +87,7 @@ void simul_ooo(struct Config* config)
 
 	free(fetch_queue)
 	free(rob.data)
-
+		free(rs
 }
 
 struct cycle_index{
