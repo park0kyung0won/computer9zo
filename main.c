@@ -8,7 +8,7 @@
 //#include "read.h" //read config and instruction
 //#include "simul.h"//func related simulation
 
-typedef struct Config { int justtest;  } Config;
+//typedef struct Config { int justtest;  } Config;
 
 int main(int argc, char* argv[])
 {
