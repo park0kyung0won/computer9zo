@@ -16,14 +16,15 @@ struct Config
 
 void fetch(int fetch_width, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx, int fetch_queue_available)
 {
+	static int pc = 0;
 	int fetch_num = (fetch_width > fetch_queue_available)? fetch_queue_available : fetch_width;
 	int i;
 	for (i = 0; i < fetch_num; i++)
 	{
-		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).inst_type;
-		(*(fetch_queue[idx.tail])).dest = (*(inst[pc]).destination;
-		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).src1;
-		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).src2;
+		(fetch_queue[(*idx).tail]).op = (*(inst[pc]).inst_type;
+		(fetch_queue[(*idx).tail]).dest = (*(inst[pc]).destination;
+		(fetch_queue[(*idx).tail]).op = (*(inst[pc]).src1;
+		(fetch_queue[(*idx).tail]).op = (*(inst[pc]).src2;
 		pc++;
 		move_cidx_tail(idx, 1);
 	}	
@@ -115,7 +116,7 @@ void excute_retire(struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle
 {
 	if ( (--((*rs).time_left) ) < 0)//타이머를 1줄이고, 만약 0 이하라면 (ex 완료) ROB의 state를 C
 	{//ex completed in this step
-		rob[(*rs).index_rob].status = 'C';
+		rob[(*rs).index_rob].status = C;
 		is_completed_this_cycle[(*rs).index_rob] = true;
 		(*rs).is_valid = false;
 	}
@@ -127,7 +128,25 @@ void excute_retire(struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle
 // delta_n_rob -= 제거한 인스트럭션 갯수;
 void commit(struct RAT* rat, struct ROB* rob, struct Cycle_index* index_rob)
 {
+	int i;
+	int num_inst_to_retire = 0;
+	for (i = 0; (((*index_rob).head + i) % (*index_rob).size) < (*index_rob).tail; i++)
+	{
+		if ( rob[i].status == C )
+		{
+			num_inst_to_retire++;
+		}
+		else
+		{
+			break;
+		}	
+	}
 
+	for (i = 0; i < num_inst_to_retire; i++)
+	{
+		rat[rob[i].dest].RF_valid = true;
+		move_cidx_tail(index_rob, 1);	
+	}	
 };
 
 void simul_ooo(struct Config* config)
