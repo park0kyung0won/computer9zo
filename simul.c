@@ -42,13 +42,13 @@ void fetch(int fetch_width, FILE* inst_mem, struct FQ* fetch_queue, struct Cycle
 // delta_n_rs += 이동한 인스트럭션 갯수; 를 해준다
 // delta_n_rob += 이동한 인스트럭션 갯수; 를 해준다
 // 그리고 output에 해당하는 RT의 RF_VALID를 수정해준다
-void decode();
+void decode(struct FQ* fetch_queue,struct RS* rs, struct ROB* rob);
 
 // RS를 포인터로 받아서
 // time이 -1인 것들에 대해
 // operand 모두가 V 상태이라면
 // time을 -1에서 '수행에 걸리는 시간' 값으로 바꿔준다. ( 실행 시작 )
-void issue();
+void issue( struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle );
 
 // RS를 포인터로 받아서
 // execution을 한다 (operand가 전부 V 상태이면 time 하나 뺌)
@@ -62,7 +62,13 @@ void execution();
 // 를 operand의 Q로 가지고 있는 RS의 인스트럭션한테
 // 값을 전달해주고 그 operand를 Q에서 V로 바꾼다
 // delta_n_rs -= 제거한 인스트럭션 갯수;
-void rs_retire();
+void rs_retire()
+{
+	if ((--rs[idx].time_left) < 0)//타이머를 1줄이고, 만약 0 이하라면 (ex 완료) ROB의 state를 C
+	{//ex completed in this step
+		rob[rs[idx].index_rob].status = 'C';
+	}
+}
 
 // ROB랑 RAT를 포인터로 받아서
 // ROB에서 C이고, 자기 앞의 인스트럭션이 모두 C인 인스트럭션들을
@@ -98,7 +104,7 @@ void simul_ooo(struct Config* config)
 
 	struct ROB* rob = malloc(sizeof(struct ROB) * ((*config).rob_size));
 	struct Cycle_index index_rob = { 0,0,0,(*config).rob_size};//rob의 인덱스
-	bool 
+	bool is_completed_this_cycle = malloc(sizeof(bool) * (*config).rob_size);//이번 사이클 업데이트
 
 	struct RS*	rs = malloc( sizeof(struct RS) * ((*config).rs_size) );
 	struct Cycle_index index_rs = { 0,0,0,((*config).rs_size) };//rs의 인덱스
@@ -113,6 +119,10 @@ void simul_ooo(struct Config* config)
 	// Starting Simulation
 	//
 
+	int fetch_num;
+	int decode_num;
+	int issue_num;
+
 	do
 	{//do one cycle
 
@@ -120,23 +130,32 @@ void simul_ooo(struct Config* config)
 		updatelen(&index_fq);//update len_of_fq
 		updatelen(&index_rob);//update len_of_rob
 
+		//fetch num and decode num and essue init
+		fetch_num = 0;
+		decode_num = 0;
+		issue_num = 0;
+
 		//in ROS
 		commit(rat, rob, &index_rob);
 
 		//in every RS
 		for (int idx = 0; idx < index_rs.size; ++idx )
 		{
-			if elem is blank and decode_(in_this_cycle < N) ;
-				decode;
-
-			else if elem time is - 1;
-				issue
-				//if have q value, access Ros[q] and if Ros[q].state == c, set timer
-
+			
+			if (decode_num < N && (rs[idx].is_valid == false) )
+			{//만약 빈 공간이라면, 디코드 최대치에 다다를때까지 디코드한다.
+				++decode_num;
+				decode(fetch_queue, rs, rob);
+			}
+			else if (issue_num < N && (rs[idx].time_left == -1))
+			{//타이머 설정이 안됬다면 (P상태 Instruction이라면) 값이 준비되었는지 확인하고 issue한다.
+				issue(rs, rob, is_completed_this_cycle);
+			}
 			else //timer seted mean it alredy issued
-				--(elem.time)//one step forward
-				if elem.time<0//ex completed in this step
-					Ros(elem.ROS_index).state = C
+			{
+				rs_retire()
+
+			}
 
 		}
 		//in fetch queue
