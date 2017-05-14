@@ -8,7 +8,7 @@
 
 typedef struct Config { int justtest;  } Config;
 
-void main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 	//
 	// Read config file and make config array
@@ -36,5 +36,7 @@ void main(int argc, char* argv[])
 
 	
 	free(configs);// free config
+
+	return 0;
 
 }
