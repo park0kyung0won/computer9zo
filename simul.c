@@ -60,30 +60,36 @@ void simul_ooo(struct Config* config)
 
 		//in ROS
 		commit(elem) // when end elem not C state
+		//it just moving head pointer to end of C state
 
 		//in every RS
 		for each elem in RS
 		{
-			if elem is blank and ROS have a space;
+			if elem is blank and decode_(in_this_cycle < N) ;
 				decode;
+
 			else if elem time is - 1;
+				issue
+				//if have q value, access Ros[q] and if Ros[q].state == c, set timer
 
 			else //timer seted mean it alredy issued
 				--(elem.time)//one step forward
 				if elem.time<0//ex completed in this step
-					
+					Ros(elem.ROS_index).state = C
+
 		}
-		//in every 
-		for 
+		//in fetch queue
+		for fetch_num_in_this_cycle < min ( N , fetch_que_size - fetch_queue_elem_num)
+		{
+			fetch(end_of_fetch_queue);
+		}
 
 
 	}
-	while()
+	while( ~is_fetch_eof && (rob_elem_num > 0) )
 
 	free(fetch_queue)
 	free(rob.data)
-			struct ROB data* = malloc(sizeof(struct ROB) * ((config*).rob_size));
-		} rob;
 
 }
 
