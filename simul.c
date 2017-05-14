@@ -11,7 +11,7 @@ void fetch(int *pc, int fetch_width, int inst_length, struct Instruction *inst, 
 {
 	int fetch_num = (fetch_width > (*idx).blank) ? (*idx).blank : fetch_width;
 	int i;
-	for (i = 0; i < fetch_num && pc < inst_length; i++)
+	for (i = 0; i < fetch_num && (*pc) < inst_length; i++)
 	{
 		(fetch_queue[(*idx).tail]).op = (inst[*pc]).inst_type;
 		(fetch_queue[(*idx).tail]).dest = (inst[*pc]).destination;
@@ -150,11 +150,11 @@ void simul_ooo(struct Config* config)
 			int memread;//read mem
 			int memwrite;//write mem
 		} inst;//num of instructions
-	};
+	} status;
 
 	// Init OoO
 	enum Debug { None = 0, ROB = 1, RSROB = 2 } debug = (*config).Dump; //set Debug_mode from config
-	
+
 	int N = (*config).Width;//set fetch = decode = issue width
 
 	struct FQ* fetch_queue = malloc(sizeof(struct FQ) * 2 * N);//set fetch_queue
@@ -172,6 +172,10 @@ void simul_ooo(struct Config* config)
 	int Instruction_length;
 	struct Instruction* inst_arr;
 	Instruction_length = make_inst_array(TRACE_FILENAME, inst_arr);
+	
+	char output_title[50];
+	sprintf_s(output_title, 50, "%d_%d_%d_%d_output.out", config->Dump, config->Width, config->ROB_size, config->Res_size);
+	FILE* report = fopen(strlen()
 	//
 	// Starting Simulation
 	//
@@ -183,9 +187,11 @@ void simul_ooo(struct Config* config)
 	bool fetch_eof = false;
 	int pc = 0;
 	
+	
 
 	do
 	{//do one cycle
+		++(status.cycle);
 
 		//# of elements update
 		update_blank(&index_fq);//update len_of_fq
@@ -216,6 +222,16 @@ void simul_ooo(struct Config* config)
 				 // fetch가 다 떨어지지 않았다면 디코드 최대치에 다다를때까지 디코드한다.
 					++decode_num;
 					decode(fetch_queue, &index_fq, rs + idx, rat, rob, &index_rob);
+
+
+					//디코드 시 들어간 펑션 종류를 체크한다.
+					switch (fetch_queue[index_fq.head].op)
+					{
+					case IntAlu: ++(status.inst.intalu); break;
+					case MemRead: ++(status.inst.memread); break;
+					case MemWrite: ++(status.inst.memwrite); break;
+					}
+					++(status.inst.total);
 				}
 			}
 			else if (issue_num < N && (rs[idx].time_left == -1))
@@ -232,7 +248,8 @@ void simul_ooo(struct Config* config)
 
 		//in fetch queue
 		fetch(&pc, N, Instruction_length, inst_arr, fetch_queue, &index_fq);
-
+		
+		
 
 	} while ( (index_fq.blank != index_fq.size) || (index_rob.blank != index_rob.size) );
 

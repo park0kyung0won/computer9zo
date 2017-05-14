@@ -24,41 +24,38 @@ struct Config
  int Res_size;
 };
 
+
 int read_instruction(FILE *in_filename, struct Instruction *out_inst)
 {
- char buffer[30];
- if (fgets(buffer, 30, in_filename) != NULL)
- {
-	 char inst_now[8];
-	 strcpy(inst_now, strtok(buffer, " "));
-	 printf("%s\n", inst_now);
-	 if (strcmp(inst_now, "IntAlu") != 1)
-		 out_inst->inst_type = 0;
-	 else if (strcmp(inst_now, "MemRead") != 1)
-		 out_inst->inst_type = 1;
-	 else
-		 out_inst->inst_type = 2;
+	char buffer[30];
+	if (fgets(buffer, 30, in_filename) != NULL)
+	{
+		char inst_now[8];
+		strcpy(inst_now, strtok(buffer, " "));
+		//	printf("%s\n",inst_now);
+		if (strcmp(inst_now, "IntAlu") != 1)
+			out_inst->inst_type = 0;
+		else if (strcmp(inst_now, "MemRead") != 1)
+			out_inst->inst_type = 1;
+		else
+			out_inst->inst_type = 2;
+		out_inst->destination = atoi(strtok(NULL, " "));
+		out_inst->src1 = atoi(strtok(NULL, " "));
+		out_inst->src2 = atoi(strtok(NULL, " "));
 
-	 out_inst->destination = atoi(strtok(NULL, " "));
-	 out_inst->src1 = atoi(strtok(NULL, " "));
-	 out_inst->src2 = atoi(strtok(NULL, " "));
-	 if (out_inst->inst_type != 0)
-	 {
-		 out_inst->src2 = atoi(strtok(NULL, " "));
-	 }
+		/*  if (strcmp(out_inst->inst_type, "MemRead") || strcmp(out_inst->inst_type, "MemWrite"))
+		{strcpy(out_inst->addr,strtok(NULL," "));
+		}
+		*/
 
-	 /*  if (strcmp(out_inst->inst_type, "MemRead") || strcmp(out_inst->inst_type, "MemWrite"))
-	   {strcpy(out_inst->addr,strtok(NULL," "));
-	   }
-	 */
-
-	 return 0;
- }
- else
- {
-	 return 1;
- }
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
+
 
 
 int make_inst_array(char* filename, struct Instruction *out_inst)
@@ -74,19 +71,19 @@ int make_inst_array(char* filename, struct Instruction *out_inst)
 		tmp = fgetc(p_file);
 		if (tmp == '\n')
 		{
-			lines++;
+			++lines;
 		}
 	}
+	lines++;
 	fclose(p_file);
-	FILE* pfile;
-	pfile = fopen(filename, "r");
+	p_file = fopen(filename, "r");
 	out_inst = (struct Instruction*)malloc(sizeof(struct Instruction)*lines);
 
 	for (int i = 0; i<lines; i++)
 	{
-		read_instruction(pfile, &out_inst[i]);
+		read_instruction(p_file, out_inst + i);
 	}
-	fclose(pfile);
+	fclose(p_file);
 	return lines;
 }
 
@@ -114,6 +111,8 @@ void configprinter(struct Config* config)
 	printf("-> Dump : %d | Width : %d | ROB_size : %d | Res_size : %d |",
 		config->Dump, config->Width, config->ROB_size, config->Res_size);
 }
+
+
 //
 //void main()
 //{
