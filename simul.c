@@ -14,17 +14,18 @@ struct Config
 };
 
 
-void fetch(int fetch_width, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx, int fetch_queue_available)
+void fetch(int* pc, int fetch_width, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
 {
-	int fetch_num = (fetch_width > fetch_queue_available)? fetch_queue_available : fetch_width;
+	if (pc )
+	int fetch_num = (fetch_width > (*idx).blank )? (*idx).blank : fetch_width;
 	int i;
 	for (i = 0; i < fetch_num; i++)
 	{
-		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).inst_type;
-		(*(fetch_queue[idx.tail])).dest = (*(inst[pc]).destination;
-		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).src1;
-		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).src2;
-		pc++;
+		fetch_queue[(*idx).tail].op = inst[*pc].inst_type;
+		fetch_queue[(*idx).tail].dest = inst[*pc].destination;
+		fetch_queue[(*idx).tail].oprd1 = inst[*pc].src1;
+		fetch_queue[(*idx).tail].oprd2 = inst[*pc].src2;
+		++(*pc);
 		move_cidx_tail(idx, 1);
 	}	
 	
@@ -42,49 +43,46 @@ void fetch(int fetch_width, struct Instruction *inst, struct FQ* fetch_queue, st
 // 그리고 output에 해당하는 RT의 RF_VALID를 수정해준다
 void decode(struct FQ* fq, struct Cycle_index* index_fq, struct RS* rs, struct RAT* rat, struct ROB* rob,struct Cycle_index* index_rob)
 {
-	if ((*index_fq).size != (*index_fq).blank)
-	{
-		//regist in rob
-		rob[(*index_rob).tail].dest = fq[(*index_fq).head].dest;
-		rob[(*index_rob).tail].op = fq[(*index_fq).head].op;
-		rob[(*index_rob).tail].status = P;
-			//rob[(*index_rob).tail].value = 0;
+	//regist in rob
+	rob[(*index_rob).tail].dest = fq[(*index_fq).head].dest;
+	rob[(*index_rob).tail].op = fq[(*index_fq).head].op;
+	rob[(*index_rob).tail].status = P;
+		//rob[(*index_rob).tail].value = 0;
 		
-		//rat change
-		rat[fq[(*index_fq).head].dest].RF_valid = false;
-		rat[fq[(*index_fq).head].dest].Q = (*index_rob).tail;
+	//rat change
+	rat[fq[(*index_fq).head].dest].RF_valid = false;
+	rat[fq[(*index_fq).head].dest].Q = (*index_rob).tail;
 
-		//regist in rs
-		(*rs).index_rob = (*index_rob).tail;
-		(*rs).is_valid = true;
-		(*rs).op = fq[(*index_fq).head].op;
-		if (rat[fq[(*index_fq).head].oprd1].RF_valid)
-		{//if rat true
-			(*rs).oprd_1.state = V;
-			(*rs).oprd_1.data.v = fq[(*index_fq).head].oprd1;
-		}
-		else
-		{
-			(*rs).oprd_1.state = Q;
-			(*rs).oprd_1.data.q = rat[fq[(*index_fq).head].oprd1].Q;
-		}
-
-		if ((*rs).op != IntAlu || rat[fq[(*index_fq).head].oprd2].RF_valid)
-		{//if rat true
-			(*rs).oprd_2.state = V;
-			(*rs).oprd_2.data.v = fq[(*index_fq).head].oprd2;
-		}
-		else
-		{
-			(*rs).oprd_2.state = Q;
-			(*rs).oprd_2.data.q = rat[fq[(*index_fq).head].oprd2].Q;
-		}
-		(*rs).time_left = -1;
-		
-		//update head and tail
-		move_cidx_tail(index_rob, 1);
-		move_cidx_head(index_fq, 1);
+	//regist in rs
+	(*rs).index_rob = (*index_rob).tail;
+	(*rs).is_valid = true;
+	(*rs).op = fq[(*index_fq).head].op;
+	if (rat[fq[(*index_fq).head].oprd1].RF_valid)
+	{//if rat true
+		(*rs).oprd_1.state = V;
+		(*rs).oprd_1.data.v = fq[(*index_fq).head].oprd1;
 	}
+	else
+	{
+		(*rs).oprd_1.state = Q;
+		(*rs).oprd_1.data.q = rat[fq[(*index_fq).head].oprd1].Q;
+	}
+
+	if ((*rs).op != IntAlu || rat[fq[(*index_fq).head].oprd2].RF_valid)
+	{//if rat true
+		(*rs).oprd_2.state = V;
+		(*rs).oprd_2.data.v = fq[(*index_fq).head].oprd2;
+	}
+	else
+	{
+		(*rs).oprd_2.state = Q;
+		(*rs).oprd_2.data.q = rat[fq[(*index_fq).head].oprd2].Q;
+	}
+	(*rs).time_left = -1;
+	
+	//update head and tail
+	move_cidx_tail(index_rob, 1);
+	move_cidx_head(index_fq, 1);
 }
 
 // RS를 포인터로 받아서
@@ -115,7 +113,7 @@ void excute_retire(struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle
 {
 	if ( (--((*rs).time_left) ) < 0)//타이머를 1줄이고, 만약 0 이하라면 (ex 완료) ROB의 state를 C
 	{//ex completed in this step
-		rob[(*rs).index_rob].status = 'C';
+		rob[(*rs).index_rob].status = C;
 		is_completed_this_cycle[(*rs).index_rob] = true;
 		(*rs).is_valid = false;
 	}
@@ -173,9 +171,12 @@ void simul_ooo(struct Config* config)
 	// Starting Simulation
 	//
 
+	//declear some value
 	int fetch_num;
 	int decode_num;
 	int issue_num;
+
+	int Instruction length struct Instruction *inst
 
 	do
 	{//do one cycle
@@ -202,7 +203,7 @@ void simul_ooo(struct Config* config)
 			
 			if (rs[idx].is_valid == false)
 			{//만약 빈 공간이라면,
-				if (decode_num < N && index_rob.blank != 0)
+				if (decode_num < N && index_rob.blank != 0 && ()
 				{// rob가 다차지 않았다면 , N개를 decode하지 않았다면 디코드 최대치에 다다를때까지 디코드한다.
 					++decode_num;
 					decode(fetch_queue, &index_fq, rs + idx, rat, rob, &index_rob);
@@ -210,6 +211,7 @@ void simul_ooo(struct Config* config)
 			}
 			else if (issue_num < N && (rs[idx].time_left == -1))
 			{//타이머 설정이 안됬다면 (P상태 Instruction이라면) 값이 준비되었는지 확인하고 issue한다.
+				++issue_num;
 				issue(rs + idx, rob, is_completed_this_cycle);
 			}
 			else //timer seted mean it alredy issued

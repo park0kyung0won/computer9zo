@@ -8,12 +8,18 @@ struct Cycle_index
 	int is_reversed;
 };
 
-inline void update_blank(struct Cycle_index* cidx)
+inline int getblank(struct Cycle_index* cidx)
 {
 	if ((*cidx).is_reversed == 0)
-		(*cidx).blank = (*cidx).size - ((*cidx).tail - (*cidx).head); 
+		return (*cidx).size - ((*cidx).tail - (*cidx).head);
 	else
-		(*cidx).blank = (*cidx).head - (*cidx).tail;
+		return (*cidx).head - (*cidx).tail;
+}
+
+
+inline void update_blank(struct Cycle_index* cidx)
+{
+	(*cidx).blank = getblank(cidx);
 }
 
 inline void move_cidx_head(struct Cycle_index* cidx, int move_num)
