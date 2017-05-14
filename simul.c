@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include "components.h"
 #include "cycleindex.c"
@@ -14,61 +14,61 @@ struct Config
 };
 
 
-void fetch(int fetch_width, FILE* inst_mem, struct FQ* fetch_queue, struct Cycle_index* idx )
+void fetch(int fetch_width, FILE* inst_mem, struct FQ* fetch_queue, struct Cycle_index* idx);
 /*{
 	for (int num_fetch = 0;
-		num_fetch < fetch_width && num_fetch < ((*idx).length - (*idx).n_elem);//ºó°ø°£À» ´Ù Ã¤¿ì°Å³ª N¸¸Å­ ÆÐÄ¡Çß´Ù¸é Á¤Áö
+		num_fetch < fetch_width && num_fetch < ((*idx).length - (*idx).n_elem);//ë¹ˆê³µê°„ì„ ë‹¤ ì±„ìš°ê±°ë‚˜ Në§Œí¼ íŒ¨ì¹˜í–ˆë‹¤ë©´ ì •ì§€
 		++num_fetch)
 	{
-		//fetch_queue[(*idx).end]¿¡ instruction Ã¤¿ì±â
+		//fetch_queue[(*idx).end]ì— instruction ì±„ìš°ê¸°
 		if ( ~ (read_instruction(inst_mem, (fetch_queue + (*idx).end) ) ) )
 			break;//if is eof, fetch stop;
 
-		(*idx).end = ((*idx).end + 1) % (*idx).length;//»çÀÌÅ¬¸¯ ¾î·¹ÀÌ
+		(*idx).end = ((*idx).end + 1) % (*idx).length;//ì‚¬ì´í´ë¦­ ì–´ë ˆì´
 	}
 }*/
-//ºó°ø°£ÀÌ ÀÖ´Ù¸é,
-//µ¿ÁÖ°¡ ¸¸µç read_inst ÇÔ¼ö¸¦ ÀÌ¿ëÇØ¼­ ¹ÞÀº instructionÀ»
-//FQÇüÅÂ·Î º¯È¯ÇØ¼­ ÀúÀå.
+//ë¹ˆê³µê°„ì´ ìžˆë‹¤ë©´,
+//ë™ì£¼ê°€ ë§Œë“  read_inst í•¨ìˆ˜ë¥¼ ì´ìš©í•´ì„œ ë°›ì€ instructionì„
+//FQí˜•íƒœë¡œ ë³€í™˜í•´ì„œ ì €ìž¥.
 
 
 
-// fetch queue¶û RS, ROB, RT¸¦ Æ÷ÀÎÅÍ·Î ¹Þ¾Æ¼­
-// n_fq¿Ín_rs, n_rob¸¦ °í·ÁÇÏ¿©
-// °¡´ÉÇÑ °¹¼ö ¸¸Å­ ÀÎ½ºÆ®·°¼ÇÀ» fetch_queue¿¡¼­ °¡Á®¿Í
-// RS¿Í ROB¿¡ ³Ö¾îÁØ´Ù
-// (RS¿¡ ³ÖÀ» ¶§, operand µÑ Áß ÇÏ³ª¶óµµ Q¸é timeÀ» -1·Î ÁöÁ¤ÇØ ³õ´Â´Ù)
-// delta_n_fq -= ÀÌµ¿ÇÑ ÀÎ½ºÆ®·°¼Ç °¹¼ö; ¸¦ ÇØÁØ´Ù
-// delta_n_rs += ÀÌµ¿ÇÑ ÀÎ½ºÆ®·°¼Ç °¹¼ö; ¸¦ ÇØÁØ´Ù
-// delta_n_rob += ÀÌµ¿ÇÑ ÀÎ½ºÆ®·°¼Ç °¹¼ö; ¸¦ ÇØÁØ´Ù
-// ±×¸®°í output¿¡ ÇØ´çÇÏ´Â RTÀÇ RF_VALID¸¦ ¼öÁ¤ÇØÁØ´Ù
+// fetch queueëž‘ RS, ROB, RTë¥¼ í¬ì¸í„°ë¡œ ë°›ì•„ì„œ
+// n_fqì™€n_rs, n_robë¥¼ ê³ ë ¤í•˜ì—¬
+// ê°€ëŠ¥í•œ ê°¯ìˆ˜ ë§Œí¼ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ì„ fetch_queueì—ì„œ ê°€ì ¸ì™€
+// RSì™€ ROBì— ë„£ì–´ì¤€ë‹¤
+// (RSì— ë„£ì„ ë•Œ, operand ë‘˜ ì¤‘ í•˜ë‚˜ë¼ë„ Që©´ timeì„ -1ë¡œ ì§€ì •í•´ ë†“ëŠ”ë‹¤)
+// delta_n_fq -= ì´ë™í•œ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ ê°¯ìˆ˜; ë¥¼ í•´ì¤€ë‹¤
+// delta_n_rs += ì´ë™í•œ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ ê°¯ìˆ˜; ë¥¼ í•´ì¤€ë‹¤
+// delta_n_rob += ì´ë™í•œ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ ê°¯ìˆ˜; ë¥¼ í•´ì¤€ë‹¤
+// ê·¸ë¦¬ê³  outputì— í•´ë‹¹í•˜ëŠ” RTì˜ RF_VALIDë¥¼ ìˆ˜ì •í•´ì¤€ë‹¤
 void decode();
 
-// RS¸¦ Æ÷ÀÎÅÍ·Î ¹Þ¾Æ¼­
-// timeÀÌ -1ÀÎ °Íµé¿¡ ´ëÇØ
-// operand ¸ðµÎ°¡ V »óÅÂÀÌ¶ó¸é
-// timeÀ» -1¿¡¼­ '¼öÇà¿¡ °É¸®´Â ½Ã°£' °ªÀ¸·Î ¹Ù²ãÁØ´Ù. ( ½ÇÇà ½ÃÀÛ )
+// RSë¥¼ í¬ì¸í„°ë¡œ ë°›ì•„ì„œ
+// timeì´ -1ì¸ ê²ƒë“¤ì— ëŒ€í•´
+// operand ëª¨ë‘ê°€ V ìƒíƒœì´ë¼ë©´
+// timeì„ -1ì—ì„œ 'ìˆ˜í–‰ì— ê±¸ë¦¬ëŠ” ì‹œê°„' ê°’ìœ¼ë¡œ ë°”ê¿”ì¤€ë‹¤. ( ì‹¤í–‰ ì‹œìž‘ )
 void issue();
 
-// RS¸¦ Æ÷ÀÎÅÍ·Î ¹Þ¾Æ¼­
-// executionÀ» ÇÑ´Ù (operand°¡ ÀüºÎ V »óÅÂÀÌ¸é time ÇÏ³ª »­)
+// RSë¥¼ í¬ì¸í„°ë¡œ ë°›ì•„ì„œ
+// executionì„ í•œë‹¤ (operandê°€ ì „ë¶€ V ìƒíƒœì´ë©´ time í•˜ë‚˜ ëºŒ)
 void execution();
 
 
-// RS¶û ROB¸¦ Æ÷ÀÎÅÍ·Î ¹Þ¾Æ¼­
-// time = 0ÀÎ ÀÎ½ºÆ®·°¼ÇÀ» RS¿¡¼­ Á¦°ÅÇÏ°í,
-// ±× ÀÎ½ºÆ®·°¼ÇÀ» ROB¿¡¼­ C »óÅÂ·Î ¹Ù²Û´Ù
-// ±×¸®°í ±× ÀÎ½ºÆ®·°¼ÇÀÌ ¼ÓÇÑ ROBÀÇ ÀÚ¸® (ex ROB3)
-// ¸¦ operandÀÇ Q·Î °¡Áö°í ÀÖ´Â RSÀÇ ÀÎ½ºÆ®·°¼ÇÇÑÅ×
-// °ªÀ» Àü´ÞÇØÁÖ°í ±× operand¸¦ Q¿¡¼­ V·Î ¹Ù²Û´Ù
-// delta_n_rs -= Á¦°ÅÇÑ ÀÎ½ºÆ®·°¼Ç °¹¼ö;
+// RSëž‘ ROBë¥¼ í¬ì¸í„°ë¡œ ë°›ì•„ì„œ
+// time = 0ì¸ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ì„ RSì—ì„œ ì œê±°í•˜ê³ ,
+// ê·¸ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ì„ ROBì—ì„œ C ìƒíƒœë¡œ ë°”ê¾¼ë‹¤
+// ê·¸ë¦¬ê³  ê·¸ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ì´ ì†í•œ ROBì˜ ìžë¦¬ (ex ROB3)
+// ë¥¼ operandì˜ Që¡œ ê°€ì§€ê³  ìžˆëŠ” RSì˜ ì¸ìŠ¤íŠ¸ëŸ­ì…˜í•œí…Œ
+// ê°’ì„ ì „ë‹¬í•´ì£¼ê³  ê·¸ operandë¥¼ Qì—ì„œ Vë¡œ ë°”ê¾¼ë‹¤
+// delta_n_rs -= ì œê±°í•œ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ ê°¯ìˆ˜;
 void rs_retire();
 
-// ROB¶û RAT¸¦ Æ÷ÀÎÅÍ·Î ¹Þ¾Æ¼­
-// ROB¿¡¼­ CÀÌ°í, ÀÚ±â ¾ÕÀÇ ÀÎ½ºÆ®·°¼ÇÀÌ ¸ðµÎ CÀÎ ÀÎ½ºÆ®·°¼ÇµéÀ»
-// ¾ø¾Ö°í RAT¿¡¼­ RF_VALID¸¦ T·Î ¹Ù²Ù¾î ÁØ´Ù
-// delta_n_rob -= Á¦°ÅÇÑ ÀÎ½ºÆ®·°¼Ç °¹¼ö;
-void commit(struct RAT* rat , struct ROB* rob, struct Cycle_index&index_rob));
+// ROBëž‘ RATë¥¼ í¬ì¸í„°ë¡œ ë°›ì•„ì„œ
+// ROBì—ì„œ Cì´ê³ , ìžê¸° ì•žì˜ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ì´ ëª¨ë‘ Cì¸ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ë“¤ì„
+// ì—†ì• ê³  RATì—ì„œ RF_VALIDë¥¼ Të¡œ ë°”ê¾¸ì–´ ì¤€ë‹¤
+// delta_n_rob -= ì œê±°í•œ ì¸ìŠ¤íŠ¸ëŸ­ì…˜ ê°¯ìˆ˜;
+void commit(struct RAT* rat , struct ROB* rob, struct Cycle_index* index_rob);
 
 void simul_ooo(struct Config* config)
 {
@@ -93,17 +93,20 @@ void simul_ooo(struct Config* config)
 	
 	int N = (*config).width;//set fetch = decode = issue width
 
-	struct FQ* fetch_queue = malloc(sizeof(struct FI) * 2 * N);//set fetch_queue
-	struct Cycle_index index_fq = {0,0,0,2*N};//fetch_queueÀÇ ÀÎµ¦½º
+	struct FQ* fetch_queue = malloc(sizeof(struct FQ) * 2 * N);//set fetch_queue
+	struct Cycle_index index_fq = {0,0,0,2*N};//fetch_queueì˜ ì¸ë±ìŠ¤
 
 	struct ROB* rob = malloc(sizeof(struct ROB) * ((*config).rob_size));
-	struct Cycle_index index_rob = { 0,0,0,(*config).rob_size};//robÀÇ ÀÎµ¦½º
+	struct Cycle_index index_rob = { 0,0,0,(*config).rob_size};//robì˜ ì¸ë±ìŠ¤
+	bool 
 
 	struct RS*	rs = malloc( sizeof(struct RS) * ((*config).rs_size) );
-	int n_rs; // Reservation Station¿¡ ÀÎ½ºÆ®·°¼ÇÀÌ ¸î °³³ª µé¾îÀÖ´ÂÁö ¾Ë·ÁÁØ´Ù
-	int delta_n_rs; // n_rsÀÇ º¯È­¸¦ ÀÇ¹ÌÇÑ´Ù.  ÆÄÀÌÇÁ¶óÀÎ ±¸ÇöÀ» À§ÇÔ.
+	struct Cycle_index index_rs = { 0,0,0,((*config).rs_size) };//rsì˜ ì¸ë±ìŠ¤
 
-	struct RAT	rat[REGISTER_SIZE];
+	int n_rs; // Reservation Stationì— ì¸ìŠ¤íŠ¸ëŸ­ì…˜ì´ ëª‡ ê°œë‚˜ ë“¤ì–´ìžˆëŠ”ì§€ ì•Œë ¤ì¤€ë‹¤
+	int delta_n_rs; // n_rsì˜ ë³€í™”ë¥¼ ì˜ë¯¸í•œë‹¤.  íŒŒì´í”„ë¼ì¸ êµ¬í˜„ì„ ìœ„í•¨.
+
+	struct RAT	rat[REGISTER_SIZE];// Architectural Register File
 
 
 	//
@@ -118,10 +121,10 @@ void simul_ooo(struct Config* config)
 		updatelen(&index_rob);//update len_of_rob
 
 		//in ROS
-		commit (rat, rob, &index_rob)
+		commit(rat, rob, &index_rob);
 
 		//in every RS
-		for each elem in RS
+		for (int idx = 0; idx < index_rs.size; ++idx )
 		{
 			if elem is blank and decode_(in_this_cycle < N) ;
 				decode;

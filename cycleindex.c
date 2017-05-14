@@ -1,10 +1,10 @@
-
+ï»¿
 struct Cycle_index
 {
-	int head;//½ÃÀÛÁ¡ (¸Ç Ã³À½ ¿ø¼Ò)
-	int tail;// ³¡Á¡ (¸Ç ³¡ ¿ø¼Ò + 1)
-	int len;// ¿ø¼Ò °¹¼ö
-	int size;// ¾î·¹ÀÌ Å©±â
+	int head;//ì‹œì‘ì  (ë§¨ ì²˜ìŒ ì›ì†Œ)
+	int tail;// ëì  (ë§¨ ë ì›ì†Œ + 1)
+	int len;// ì›ì†Œ ê°¯ìˆ˜
+	int size;// ì–´ë ˆì´ í¬ê¸°
 	int is_reversed;
 };
 
@@ -15,5 +15,3 @@ inline void updatelen(struct Cycle_index* cidx)
 	else
 		(*cidx).len = (*cidx).tail - (*cidx).head;
 }
-
-inline void foward_head
