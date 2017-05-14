@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include "components.h"
 #include "cycleindex.c"
-#include "isnt.c"
+#include "isnt1.c"
 
 #define REGISTER_SIZE 16
 #define TRACE_FILENAME "trace.out"
 
-void fetch(int *pc, int fetch_width, int inst_length, struct INSTRUCTION *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
+void fetch(int *pc, int fetch_width, int inst_length, struct INST *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
 {
 	int fetch_num = (fetch_width > (*idx).blank) ? (*idx).blank : fetch_width;
 	int i;

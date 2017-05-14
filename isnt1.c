@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
-struct INSTRUCTION
+struct INST
 {
  int inst_type;
  int destination;
@@ -20,7 +20,7 @@ struct Config
  int Res_size;
 };
 
-int read_instruction(FILE *in_filename, struct INSTRUCTION *out_inst)
+int read_instruction(FILE *in_filename, struct INST *out_inst)
 {
  char buffer[30];
  if (fgets(buffer,30,in_filename) !=NULL)
@@ -69,7 +69,7 @@ int configreader(struct Config *config)
 	return 0; //if "fgets"function cannot get any value, then while phrase would not activated. In that case this function return 0 meaning false. if once while phrase activated, it finally goes to switch case 4 and return 1.
 }
 
-void make_inst_array(char* filename, struct INSTRUCTION *out_inst)
+void make_inst_array(char* filename, struct INST *out_inst)
 {	int lines=0;
 	char tmp;
 	char buffer[30];
@@ -89,7 +89,7 @@ void make_inst_array(char* filename, struct INSTRUCTION *out_inst)
 	printf("does file read?");
 	pfile=fopen(filename,"r");
 	printf("yes it is!");
-	out_inst=(struct INSTRUCTION*)malloc(sizeof(struct INSTRUCTION)*lines);
+	out_inst=(struct INST*)malloc(sizeof(struct INST)*lines);
 	for(int i = 0; i<lines; i++)
 	{
 		read_instruction(pfile,&out_inst[i]);
@@ -106,7 +106,7 @@ int main(void)
 		exit(1);
 	}
 	*/
-	extern struct INSTRUCTION *ptr_instruction;
+	extern struct INST *ptr_instruction;
 	make_inst_array("hw2_trace_bzip2.out", ptr_instruction);
 //	fclose(in_file);
 	return 0;
