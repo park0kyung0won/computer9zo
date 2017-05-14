@@ -1,6 +1,11 @@
 #ifndef IST
 #define IST
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+//#include <unistd.h>
+
 struct INST
 {
 	int inst_type;
