@@ -12,7 +12,7 @@ int reg[16]; // Architectural Register File
 struct 
 {
 	bool RF_valid;
-	int Q;
+	int q;
 } rat[16]; // RAT
 
 // Copy codes below, and remove this from header !
