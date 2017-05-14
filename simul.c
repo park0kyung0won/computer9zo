@@ -175,7 +175,7 @@ void simul_ooo(struct Config* config)
 	
 	char output_title[50];
 	sprintf_s(output_title, 50, "%d_%d_%d_%d_output.out", config->Dump, config->Width, config->ROB_size, config->Res_size);
-	FILE* report = fopen(strlen()
+	FILE* report = fopen(output_title, 'w');
 	//
 	// Starting Simulation
 	//
@@ -249,14 +249,69 @@ void simul_ooo(struct Config* config)
 		//in fetch queue
 		fetch(&pc, N, Instruction_length, inst_arr, fetch_queue, &index_fq);
 		
-		
+
+		//for print report
+		if (debug != None)
+		{
+			fprintf(report,"= Cycle %d\n", status.cycle);
+
+			if (debug == RSROB)
+			{
+				for (int idx = 0; idx < size_rs; ++idx)
+				{
+					if (rs[idx].is_valid)
+					{
+						fprintf(report,"RS%d\t:ROB%d\t", idx + 1, rs[idx].index_rob);
+						if (rs[idx].oprd_1.state == V)
+							fprintf(report,"V\t");
+						else
+							fprintf(report,"%d\t", rs[idx].oprd_1.data.q );
+
+						if (rs[idx].oprd_2.state == V)
+							fprintf(report,"V\t");
+						else
+							fprintf(report,"%d\n", rs[idx].oprd_2.data.q);
+					}
+					else
+					{
+						fprintf(report,"RS%d\t:EMPTY\n", idx + 1);
+					}
+				}
+			}
+			for (int idx = 0; idx < index_rob.size; ++idx)
+			{
+				if (idx >= index_rob.size - index_rob.blank)
+				{
+					fprintf(report,"ROB%d\t:P\n", idx + 1);
+				}
+				else
+				{
+					fprintf(report,"RS%d\t:%c\n", idx + 1, (rob[idx].status==P)?'P':'C');
+				}
+			}
+		}
+
 
 	} while ( (index_fq.blank != index_fq.size) || (index_rob.blank != index_rob.size) );
 
+	//print final stat
+	fprintf(report, "Cycles\t%d\n", status.cycle);
+	fprintf(report, "IPC\t%.2f\n", ((float)status.inst.total)/status.cycle);
+	fprintf(report, "Total Insts\t%d\n", status.inst.total);
+	fprintf(report, "IntAlu\t%d\n", status.inst.intalu);
+	fprintf(report, "MemRead\t%d\n", status.inst.memread);
+	fprintf(report, "MemWrite\t%d\n", status.inst.memwrite);
+
+	fclose(report);
+
+
 	//free used data storage
+
+
 	free(fetch_queue);
 	free(rob);
 	free(is_completed_this_cycle);
 	free(rs);
+	free(inst_arr);
 }
 
