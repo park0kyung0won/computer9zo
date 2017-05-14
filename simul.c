@@ -14,19 +14,21 @@ struct Config
 };
 
 
-void fetch(int fetch_width, FILE* inst_mem, struct FQ* fetch_queue, struct Cycle_index* idx);
-/*{
-	for (int num_fetch = 0;
-		num_fetch < fetch_width && num_fetch < ((*idx).length - (*idx).n_elem);//빈공간을 다 채우거나 N만큼 패치했다면 정지
-		++num_fetch)
+void fetch(int fetch_width, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx, int fetch_queue_available)
+{
+	int fetch_num = (fetch_width > fetch_queue_available)? fetch_queue_available : fetch_width;
+	int i;
+	for (i = 0; i < fetch_num; i++)
 	{
-		//fetch_queue[(*idx).end]에 instruction 채우기
-		if ( ~ (read_instruction(inst_mem, (fetch_queue + (*idx).end) ) ) )
-			break;//if is eof, fetch stop;
-
-		(*idx).end = ((*idx).end + 1) % (*idx).length;//사이클릭 어레이
-	}
-}*/
+		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).inst_type;
+		(*(fetch_queue[idx.tail])).dest = (*(inst[pc]).destination;
+		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).src1;
+		(*(fetch_queue[idx.tail])).op = (*(inst[pc]).src2;
+		pc++;
+		move_cidx_tail(idx, 1);
+	}	
+	
+}
 //빈공간이 있다면,
 //동주가 만든 read_inst 함수를 이용해서 받은 instruction을
 //FQ형태로 변환해서 저장.
