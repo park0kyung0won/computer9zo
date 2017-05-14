@@ -9,7 +9,7 @@ enum is_complete { P = 0, C = 1 }; // P means pending, C means completed
 //int N; // Window Size
 //int reg[16]; // Architectural Register File
 
-struct FI//fetched instruction
+struct FQ//fetched instruction
 {
 	enum instruction op;
 	int dest;
