@@ -7,18 +7,21 @@
 #define REGISTER_SIZE 16
 
 
-void fetch(struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
+void fetch(int *pc, int fetch_width, int inst_length, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
 {
-	(fetch_queue[(*idx).tail]).op = inst->inst_type;
-	(fetch_queue[(*idx).tail]).dest = inst->destination;
-	(fetch_queue[(*idx).tail]).op = inst->src1;
-	(fetch_queue[(*idx).tail]).op = inst->src2;
-	move_cidx_tail(idx, 1);
-}
-//빈공간이 있다면,
-//동주가 만든 read_inst 함수를 이용해서 받은 instruction을
-//FQ형태로 변환해서 저장.
+	int fetch_num = (fetch_width > (*idx).blank) ? (*idx).blank : fetch_width;
+	int i;
+	for (i = 0; i < fetch_num && pc < inst_length; i++)
+	{
+		(fetch_queue[(*idx).tail]).op = (inst[*pc]).inst_type;
+		(fetch_queue[(*idx).tail]).dest = (inst[*pc]).destination;
+		(fetch_queue[(*idx).tail]).op = (inst[*pc]).src1;
+		(fetch_queue[(*idx).tail]).op = (inst[*pc]).src2;
+		++(*pc);
+		move_cidx_tail(idx, 1);
+	}
 
+}
 
 
 // fetch queue랑 RS, ROB, RT를 포인터로 받아서
@@ -228,16 +231,7 @@ void simul_ooo(struct Config* config)
 
 		//in fetch queue
 
-		int fetch_num = (fetch_width > (*idx).blank) ? (*idx).blank : fetch_width;
-		int i;
-		for (i = 0; i < fetch_num; i++)
-		{
-			(fetch_queue[(*idx).tail]).op = inst[*pc].inst_type;
-			(fetch_queue[(*idx).tail]).dest = inst[*pc].destination;
-			(fetch_queue[(*idx).tail]).op = inst[*pc].src1;
-			(fetch_queue[(*idx).tail]).op = inst[*pc].src2;
-			move_cidx_tail(idx, 1);
-		}
+
 		fetch_eof = fetch(int fetch_width, inst_mem, fetch_queue, index_fq);
 
 
