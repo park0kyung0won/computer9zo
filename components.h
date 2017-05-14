@@ -9,6 +9,14 @@ enum is_complete { P = 0, C = 1 }; // P means pending, C means completed
 //int N; // Window Size
 //int reg[16]; // Architectural Register File
 
+struct FI//fetched instruction
+{
+	enum instruction op;
+	int dest;
+	int oprd1;
+	int oprd2;
+};
+
 struct RAT
 {
 	bool RF_valid;
@@ -17,6 +25,7 @@ struct RAT
 
 struct RS
 {
+	int index_rob; // ROB index for linking
 	bool is_valid; // Busy or not
 	enum instruction op;
 	int time_left; // Shows cycles left to be finished. -1 means not started
@@ -38,7 +47,7 @@ struct RS
 			int q;
 		} data;
 	} oprd_2;
-}//ResvStation[N];
+};//ResvStation[N];
 
 int rob_point = 0; // points first element in ROB. Value must come btw 0 and N-1
 

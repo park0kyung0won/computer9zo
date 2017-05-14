@@ -38,5 +38,4 @@ int main(int argc, char* argv[])
 	free(configs);// free config
 
 	return 0;
-
 }
