@@ -14,12 +14,12 @@ struct Config
 };
 
 
-void fetch(int fetch_width, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx, int fetch_queue_available)
+void fetch(int fetch_width, int inst_length, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx, int fetch_queue_available)
 {
 	static int pc = 0;
 	int fetch_num = (fetch_width > fetch_queue_available)? fetch_queue_available : fetch_width;
 	int i;
-	for (i = 0; i < fetch_num; i++)
+	for (i = 0; i < fetch_num && pc < inst_length; i++)
 	{
 		(fetch_queue[(*idx).tail]).op = (*(inst[pc]).inst_type;
 		(fetch_queue[(*idx).tail]).dest = (*(inst[pc]).destination;
