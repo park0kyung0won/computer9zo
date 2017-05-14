@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "isnt1.c"
+#include "simul.h"
+
+
 
 //#include "read.h" //read config and instruction
 //#include "simul.h"//func related simulation
@@ -25,7 +27,7 @@ int main(int argc, char* argv[])
 	else
 	{//if there is input from argv
 		configs = malloc(sizeof(struct Config)*(argc-1));
-		for (int idx = 1; idx < argc; )//every config_file 
+		for (int idx = 1; idx < argc; ++idx)//every config_file 
 		{
 			if (configreader(argv[idx], (configs + idx)) != 0)//config array elem init
 			{	return 1;	}
@@ -35,11 +37,11 @@ int main(int argc, char* argv[])
 	//
 	// simulate and for every config combination
 	//
-	for (int idx_conf = 1; idx_conf < argv ; ++idx_conf)
+	for (int idx_conf = 1; idx_conf < argc ; ++idx_conf)
 	{
 		printf("conf_%d : %s \n");
 		configprinter(configs + idx_conf);
-		simul_ooo(configs[idx_conf]);//simulate
+		simul_ooo(configs + idx_conf);//simulate
 	}
 
 	free(configs);// free config

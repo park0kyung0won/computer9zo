@@ -1,11 +1,4 @@
-﻿#include <stdio.h>
-#include <stdlib.h>
-#include "components.h"
-#include "cycleindex.c"
-#include "isnt1.c"
-
-#define REGISTER_SIZE 16
-#define TRACE_FILENAME "trace.out"
+﻿#include "simul.h"
 
 void fetch(int *pc, int fetch_width, int inst_length, struct INST *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
 {
@@ -29,20 +22,20 @@ void fetch(int *pc, int fetch_width, int inst_length, struct INST *inst, struct 
 // RS와 ROB에 넣어준다
 // (RS에 넣을 때, operand 둘 중 하나라도 Q면 time을 -1로 지정해 놓는다)
 // 그리고 output에 해당하는 RT의 RF_VALID를 수정해준다
-void decode(struct FQ* fq, struct Cycle_index* index_fq, struct RS* rs, struct RAT* rat, struct ROB* rob,struct Cycle_index* index_rob)
+void decode(struct FQ* fq, struct Cycle_index* index_fq, struct RS* rs, struct RAT* rat, struct ROB* rob,struct Cycle_index* idx_rob)
 {
 	//regist in rob
-	rob[(*index_rob).tail].dest = fq[(*index_fq).head].dest;
-	rob[(*index_rob).tail].op = fq[(*index_fq).head].op;
-	rob[(*index_rob).tail].status = P;
-		//rob[(*index_rob).tail].value = 0;
+	rob[(*idx_rob).tail].dest = fq[(*index_fq).head].dest;
+	rob[(*idx_rob).tail].op = fq[(*index_fq).head].op;
+	rob[(*idx_rob).tail].status = P;
+		//rob[(*idx_rob).tail].value = 0;
 		
 	//rat change
 	rat[fq[(*index_fq).head].dest].RF_valid = false;
-	rat[fq[(*index_fq).head].dest].Q = (*index_rob).tail;
+	rat[fq[(*index_fq).head].dest].Q = (*idx_rob).tail;
 
 	//regist in rs
-	(*rs).index_rob = (*index_rob).tail;
+	(*rs).index_rob = (*idx_rob).tail;
 	(*rs).is_valid = true;
 	(*rs).op = fq[(*index_fq).head].op;
 	if (rat[fq[(*index_fq).head].oprd1].RF_valid)
@@ -69,7 +62,7 @@ void decode(struct FQ* fq, struct Cycle_index* index_fq, struct RS* rs, struct R
 	(*rs).time_left = -1;
 	
 	//update head and tail
-	move_cidx_tail(index_rob, 1);
+	move_cidx_tail(idx_rob, 1);
 	move_cidx_head(index_fq, 1);
 }
 
@@ -150,7 +143,7 @@ void simul_ooo(struct Config* config)
 			int memread;//read mem
 			int memwrite;//write mem
 		} inst;//num of instructions
-	} status;
+	} status = { 0,{0,0,0,0} };
 
 	// Init OoO
 	enum Debug { None = 0, ROB = 1, RSROB = 2 } debug = (*config).Dump; //set Debug_mode from config
@@ -170,7 +163,7 @@ void simul_ooo(struct Config* config)
 	struct RAT	rat[REGISTER_SIZE];// Architectural Register File
 
 	int Instruction_length;
-	struct Instruction* inst_arr;
+	struct INST** inst_arr = 0;
 	Instruction_length = make_inst_array(TRACE_FILENAME, inst_arr);
 	
 	char output_title[50];

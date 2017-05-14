@@ -49,7 +49,7 @@ struct RS
 	} oprd_2;
 };//ResvStation[N];
 
-int rob_point = 0; // points first element in ROB. Value must come btw 0 and N-1
+//int rob_point = 0; // points first element in ROB. Value must come btw 0 and N-1
 
 struct ROB
 {
