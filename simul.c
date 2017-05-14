@@ -2,33 +2,18 @@
 #include <stdlib.h>
 #include "components.h"
 #include "cycleindex.c"
+#include "isnt.c"
 
 #define REGISTER_SIZE 16
 
-struct Config
-{
-	int Dump;
-	int Width;
-	int ROB_size;
-	int Res_size;
-};
 
-
-void fetch(int* pc, int fetch_width, struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
+void fetch(struct Instruction *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
 {
-	static int pc = 0;
-	int fetch_num = (fetch_width > fetch_queue_available)? fetch_queue_available : fetch_width;
-	int i;
-	for (i = 0; i < fetch_num; i++)
-	{
-		(fetch_queue[(*idx).tail]).op = (*(inst[pc]).inst_type;
-		(fetch_queue[(*idx).tail]).dest = (*(inst[pc]).destination;
-		(fetch_queue[(*idx).tail]).op = (*(inst[pc]).src1;
-		(fetch_queue[(*idx).tail]).op = (*(inst[pc]).src2;
-		pc++;
-		move_cidx_tail(idx, 1);
-	}	
-	
+	(fetch_queue[(*idx).tail]).op = inst->inst_type;
+	(fetch_queue[(*idx).tail]).dest = inst->destination;
+	(fetch_queue[(*idx).tail]).op = inst->src1;
+	(fetch_queue[(*idx).tail]).op = inst->src2;
+	move_cidx_tail(idx, 1);
 }
 //빈공간이 있다면,
 //동주가 만든 read_inst 함수를 이용해서 받은 instruction을
@@ -179,9 +164,6 @@ void simul_ooo(struct Config* config)
 	struct RS*	rs = malloc( sizeof(struct RS) * ((*config).Res_size) );
 	int size_rs = (*config).Res_size;
 
-	int n_rs; // Reservation Station에 인스트럭션이 몇 개나 들어있는지 알려준다
-	int delta_n_rs; // n_rs의 변화를 의미한다.  파이프라인 구현을 위함.
-
 	struct RAT	rat[REGISTER_SIZE];// Architectural Register File
 
 
@@ -193,8 +175,10 @@ void simul_ooo(struct Config* config)
 	int fetch_num;
 	int decode_num;
 	int issue_num;
-
-	int Instruction length struct Instruction *inst
+	bool fetch_eof = false;
+	int pc = 0;
+	//int Instruction_length 
+	//struct Instruction *inst = read;
 
 	do
 	{//do one cycle
@@ -204,6 +188,7 @@ void simul_ooo(struct Config* config)
 		update_blank(&index_rob);//update len_of_rob
 
 		//fetch num and decode num and essue init
+		fetch_eof = false;
 		fetch_num = 0;
 		decode_num = 0;
 		issue_num = 0;
@@ -221,8 +206,10 @@ void simul_ooo(struct Config* config)
 			
 			if (rs[idx].is_valid == false)
 			{//만약 빈 공간이라면,
-				if (decode_num < N && index_rob.blank != 0 && ()
-				{// rob가 다차지 않았다면 , N개를 decode하지 않았다면 디코드 최대치에 다다를때까지 디코드한다.
+				if (decode_num < N && index_rob.blank != 0 && 
+					((!fetch_eof)|| index_fq.size !=getblank(&index_fq)) )
+				{// rob가 다차지 않았다면 , N개를 decode하지 않았다면 
+				 // fetch가 다 떨어지지 않았다면 디코드 최대치에 다다를때까지 디코드한다.
 					++decode_num;
 					decode(fetch_queue, &index_fq, rs + idx, rat, rob, &index_rob);
 				}
@@ -238,13 +225,23 @@ void simul_ooo(struct Config* config)
 			}
 
 		}
+
 		//in fetch queue
 
-		fetch(int fetch_width, inst_mem, fetch_queue, index_fq);
+		int fetch_num = (fetch_width > (*idx).blank) ? (*idx).blank : fetch_width;
+		int i;
+		for (i = 0; i < fetch_num; i++)
+		{
+			(fetch_queue[(*idx).tail]).op = inst[*pc].inst_type;
+			(fetch_queue[(*idx).tail]).dest = inst[*pc].destination;
+			(fetch_queue[(*idx).tail]).op = inst[*pc].src1;
+			(fetch_queue[(*idx).tail]).op = inst[*pc].src2;
+			move_cidx_tail(idx, 1);
+		}
+		fetch_eof = fetch(int fetch_width, inst_mem, fetch_queue, index_fq);
 
 
 	} while ( (index_fq.blank != index_fq.size) || (index_rob.blank != index_rob.size) );
-
 
 	//free used data storage
 	free(fetch_queue);
