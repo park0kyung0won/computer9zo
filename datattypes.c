@@ -38,16 +38,26 @@ void RS_printer(struct RS* printed)
 {
 	if (printed->is_valid)
 	{
-		printf("ROB%3d ", printed->target_rob);
-		printf("%c1:%4d ", (printed->oprd_1.state==V)?'V':'Q', (printed->oprd_1.state == V) ? printed->oprd_1.data.v : printed->oprd_1.data.q);
-		printf("%c2:%4d ", (printed->oprd_2.state == V) ? 'V' : 'Q', (printed->oprd_2.state == V) ? printed->oprd_2.data.v : printed->oprd_2.data.q);
-		printf("Time left %-1ds", printed->time_left);
+		printf("ROB%5d ", printed->target_rob);
+		printf("%s", (printed->oprd_1.state==V)?'V':'Q');
+		printf("%s", (printed->oprd_2.state == V) ? 'V' : 'Q',);
+		printf("Time left %-2ds\n", printed->time_left);
 	}
 	else
-		printf("-");
+		printf("-\n");
 }
 
-void ROB_printer(struct ROB* printed) { INST_printer(printed, false); }
+void ROB_printer(struct ROB* printed)
+{
+	if (printed->dest > 0)
+	{
+		printf("%s\t", instruction_name[printed->op]);
+		printf("R%5d ", printed->dest);
+		printf("%c\n", (printed->status==C)?'C':'P');
+	}
+	else
+		printf("-\n");
+}
 
 
 //for reporting

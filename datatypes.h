@@ -19,7 +19,7 @@ struct RS;//Reservation Staton
 struct ROB;// Reorder Buffer
 
 //for debuging
-void INST_printer(struct INST* printed);
+void INST_printer(struct INST* printed); 
 void FQ_printer(struct FQ* printed); 
 void Config_printer(struct Config* printed); 
 void RAT_printer(struct RAT* printed); 
@@ -33,6 +33,10 @@ void Config_printer(struct Config* printed, FILE* fileID);
 void RAT_printer(struct RAT* printed, FILE* fileID);
 void RS_printer(struct RS* printed, FILE* fileID);
 void ROB_printer(struct ROB* printed, FILE* fileID);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
 
 struct INST//instructrion
 {
@@ -95,7 +99,7 @@ struct RS//Res Staton
 struct ROB// Reorder Buffer
 {
 	enum instruction op; // operation
-	int value; // data 
+//	int value; // data 
 	int dest; // Destination ( Must point to one of elements in reg[16] !
 	enum is_complete status; // status = P; means pending, status = C; means completed
 };
