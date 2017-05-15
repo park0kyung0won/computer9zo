@@ -1,17 +1,18 @@
 ﻿#include "simul.h"
+#include "datatypes.h"
 
-void fetch(int *pc, int fetch_width, int inst_length, struct INST *inst, struct FQ* fetch_queue, struct Cycle_index* idx)
+void fetch(int *pc, int fetch_width, int inst_length, struct INST *inst, struct FQ* fetch_queue, struct status_cyc_arr* idx)
 {
-	int fetch_num = (fetch_width > (*idx).blank) ? (*idx).blank : fetch_width;
+	int fetch_num = (fetch_width > (*idx).size - (*idx).occupied) ? (*idx).size - (*idx).occupied : fetch_width;
 	int i;
 	for (i = 0; i < fetch_num && (*pc) < inst_length; i++)
 	{
-		(fetch_queue[(*idx).tail]).op = (inst[*pc]).inst_type;
-		(fetch_queue[(*idx).tail]).dest = (inst[*pc]).destination;
-		(fetch_queue[(*idx).tail]).op = (inst[*pc]).src1;
-		(fetch_queue[(*idx).tail]).op = (inst[*pc]).src2;
+		(fetch_queue[(*idx).head]).op = (inst[*pc]).op;
+		(fetch_queue[(*idx).head]).dest = (inst[*pc]).dest;
+		(fetch_queue[(*idx).head]).oprd1 = (inst[*pc]).oprd1;
+		(fetch_queue[(*idx).head]).oprd2 = (inst[*pc]).oprd2;
 		++(*pc);
-		move_cidx_tail(idx, 1);
+		(*idx).head = (((*idx).head + 1) % (*idx).size); 
 	}
 
 }
@@ -104,11 +105,11 @@ void excute_retire(struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle
 // ROB에서 C이고, 자기 앞의 인스트럭션이 모두 C인 인스트럭션들을
 // 없애고 RAT에서 RF_VALID를 T로 바꾸어 준다
 // delta_n_rob -= 제거한 인스트럭션 갯수;
-void commit(struct RAT* rat, struct ROB* rob, struct Cycle_index* index_rob)
+void commit(struct RAT* rat, struct ROB* rob, struct status_cyc_arr *stat_rob)
 {
 	int i;
 	int num_inst_to_retire = 0;
-	for (i = 0; (((*index_rob).head + i) % (*index_rob).size) < (*index_rob).tail; i++)
+	for (i = 0; i < (*stat_rob).occupied; i++)
 	{
 		if ( rob[i].status == C )
 		{
@@ -123,7 +124,7 @@ void commit(struct RAT* rat, struct ROB* rob, struct Cycle_index* index_rob)
 	for (i = 0; i < num_inst_to_retire; i++)
 	{
 		rat[rob[i].dest].RF_valid = true;
-		move_cidx_tail(index_rob, 1);	
+		(*stat_rob).head = (((*stat_rob).head + 1) % (*stat_rob).size);	
 	}	
 };
 
