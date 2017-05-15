@@ -14,15 +14,16 @@ bool read_instruction(FILE *in_filename, struct INST * out_inst)
 bool make_inst_array(char* filename, struct INST ** out_inst_arr, int *len)
 {		
 
-	printf("Instruction File Reader\n");
-	printf("Open %s ",filename);
+	//printf("Instruction File Reader\n");
+	//printf("Open %s ",filename);
+	printf("Read %s ", filename);
 
 	FILE* p_file = fopen(filename, "rb");
 	if (p_file== NULL) { printf("- Failed \n"); return false; }//if fail to open file, return false
-	printf("- Done \n");
+	//printf("- Done \n");
 
 	//get file size
-	printf("File size = ");
+	//printf("File size = ");
 	fseek(p_file, 0, SEEK_END);
 	int p_len = ftell(p_file);
 		//fseek(p_file, -10, SEEK_END);
@@ -30,10 +31,10 @@ bool make_inst_array(char* filename, struct INST ** out_inst_arr, int *len)
 		//fgets(tempss, 10, p_file);
 		//printf("%s", tempss);
 	fseek(p_file, 0, SEEK_SET);
-	printf("%dKB\n", sizeof(char)*p_len/1024);
+	//printf("%dKB\n", sizeof(char)*p_len/1024);
 
 	//all file load on memory
-	printf("Loading file on memory ");
+	//printf("Loading file on memory ");
 	char* p_file_buffer = (char*)calloc(p_len + 1,sizeof(char));
 	if (p_file_buffer == NULL) { printf("\nLack of memory\n"); return false; }
 
@@ -48,7 +49,7 @@ bool make_inst_array(char* filename, struct INST ** out_inst_arr, int *len)
 
 	//Make file always end \n
 	if (p_file_buffer[p_len-1] != '\n'){ p_file_buffer[p_len] = '\n'; ++p_len; }
-	printf("- Done \n");
+	//printf("- Done \n");
 
 	//close file
 	fclose(p_file);
@@ -60,7 +61,7 @@ bool make_inst_array(char* filename, struct INST ** out_inst_arr, int *len)
 	//}
 
 	//Make blank instruction array
-	printf("Allocate Memory for Instruction Array");
+	//printf("Allocate Memory for Instruction Array");
 	int length = 0;
 	for (int p_idx = 0; p_idx < p_len; ++p_idx)
 	{
@@ -69,10 +70,11 @@ bool make_inst_array(char* filename, struct INST ** out_inst_arr, int *len)
 
 	(*out_inst_arr)=(struct INST*)malloc(sizeof(struct INST)*length);
 	if ((*out_inst_arr) == NULL) { printf("\nLack of memory\n"); return false; }
-	printf("- Done \n");
+	//printf("- Done \n");
 
 	//Translate File and Fill Instruction
-	printf("Make Instruction Array -   0%%");
+	//printf("Make Instruction Array -   0%%");
+	printf("-   0%%");
 
 	bool is_worked = true;
 
@@ -156,46 +158,47 @@ bool config_reader(char* filename, struct Config *out_config)
 	//if once while phrase activated, it finally goes to switch case 4 and return 1.
 }
 
-
-void main()
-{
-/*	FILE* in_file=fopen("hw2_trace_bzip2.out","r");
-	if(in_file==NULL)
-	{
-		fputs("cannot open input file...\n",stderr);
-		exit(1);
-	}
-	*/
-	struct INST instruction;
-	FILE* fid;
-	if ((fid = fopen("hw2_trace_bzip2.out", "r")) != NULL)
-	{
-		read_instruction(fid, &instruction);
-		INST_printer(&instruction);
-		fclose(fid);
-	}
-	system("PAUSE");
-
-	struct INST *ptr_instruction;
-	int length;
-	if (!make_inst_array("hw2_trace_bzip2.out",&ptr_instruction, &length))
-	{
-		printf("Read Failed\n");
-	}
-	else
-	{
-		printf("1st-");
-		INST_printer(ptr_instruction);
-		printf("end-");
-		INST_printer(ptr_instruction + length - 1);
-	}
-	system("PAUSE");
-
-	struct Config config;
-	if (!config_reader("config.txt", &config)) { printf("Read Failed\n"); }
-	Config_printer(&config);
-
-	system("PAUSE");
-//	fclose(in_file);
-}
-
+//
+//void main()
+//{
+///*	FILE* in_file=fopen("hw2_trace_bzip2.out","r");
+//	if(in_file==NULL)
+//	{
+//		fputs("cannot open input file...\n",stderr);
+//		exit(1);
+//	}
+//	*/
+//	struct INST instruction;
+//	FILE* fid;
+//	if ((fid = fopen("hw2_trace_bzip2.out", "r")) != NULL)
+//	{
+//		read_instruction(fid, &instruction);
+//		INST_printer(&instruction);
+//		fclose(fid);
+//	}
+//	//system("PAUSE");
+//
+//	struct INST *ptr_instruction;
+//	int length;
+//	if (!make_inst_array("hw2_trace_bzip2.out",&ptr_instruction, &length))
+//	{
+//		printf("Read Failed\n");
+//	}
+//	else
+//	{
+//		printf("1st-");
+//		INST_printer(ptr_instruction);
+//		printf("end-");
+//		INST_printer(ptr_instruction + length - 1);
+//	}
+//	//system("PAUSE");
+//
+//	struct Config config;
+//	if (!config_reader("config.txt", &config)) { printf("Read Failed\n"); }
+//	Config_printer(&config);
+//
+//	//system("PAUSE");
+//	getchar();
+////	fclose(in_file);
+//}
+//

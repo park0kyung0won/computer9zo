@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\cycleindex.c" />
     <ClCompile Include="..\..\datatypes.c" />
     <ClCompile Include="..\..\fileread.c" />
+    <ClCompile Include="..\..\main.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EF92D9D5-9E04-492D-9A20-BF023DF30EB3}</ProjectGuid>

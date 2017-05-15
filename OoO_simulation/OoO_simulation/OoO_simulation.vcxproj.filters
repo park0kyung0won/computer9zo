@@ -9,5 +9,6 @@
     <ClCompile Include="..\..\cycleindex.c" />
     <ClCompile Include="..\..\fileread.c" />
     <ClCompile Include="..\..\datatypes.c" />
+    <ClCompile Include="..\..\main.c" />
   </ItemGroup>
 </Project>

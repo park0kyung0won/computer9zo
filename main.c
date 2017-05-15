@@ -3,9 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "datatypes.h"
+#include "fileread.h"
 #include "simul.h"
-
-
 
 //#include "read.h" //read config and instruction
 //#include "simul.h"//func related simulation
