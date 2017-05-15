@@ -61,12 +61,9 @@ void ROB_printer(struct ROB* printed)
 
 
 //for reporting
-void INST_printer(struct Config* config, bool is_file_print)
-{
-	
-}
-void FQ_printer(struct Config* config, bool is_file_print);
-void Config_printer(struct Config* config, bool is_file_print);
-void RAT_printer(struct Config* config, bool is_file_print );
-void RS_printer(struct Config* config, bool is_file_print);
-void ROB_printer(struct Config* config, bool is_file_print);
+void INST_printer(struct INST* printed, FILE* fileID) {}
+void FQ_printer(struct FQ* printed, FILE* fileID) {}
+void Config_printer(struct Config* printed, FILE* fileID) {}
+void RAT_printer(struct RAT* printed, FILE* fileID) {}
+void RS_printer(struct RS* printed, FILE* fileID) {}
+void ROB_printer(struct ROB* printed, FILE* fileID) {}
