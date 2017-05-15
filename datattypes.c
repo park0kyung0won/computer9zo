@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "datatypes.h"
 
+const char* instruction_name[3] = { "IntALU", "MemRead" , "MemWrite" };
 
 void INST_printer(const struct INST* printed)
 {//print inst

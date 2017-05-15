@@ -9,7 +9,7 @@
 enum flag { Q = 0, V = 1 }; // has V? or Q?
 enum instruction { IntAlu = 0, MemRead = 1, MemWrite = 2 }; // Instruction Type
 enum is_complete { P = 0, C = 1 }; // P means pending, C means completed
-const char* instruction_name[3] = { "IntALU", "MemRead" , "MemWrite" };
+const char* instruction_name[3];
 
 struct INST;//instructrion
 struct FQ;//fetch_Queue, it same INST
