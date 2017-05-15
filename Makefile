@@ -17,3 +17,5 @@ cycleindex.o: cycleindex.c
 	gcc -c -v cycleindex.c
 
 all: simulator
+
+clean: rm -rf *.o simulator

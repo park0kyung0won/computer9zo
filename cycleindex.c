@@ -1,6 +1,6 @@
 ﻿#include "cycleindex.h"
 
-int ci_at(struct Cycle_index* cindex, int ith)
+int ci_at(struct status_cyc_arr* cindex, int ith)
 {//get ith element in cycle_index
 	return ((cindex->head) + ith) % (cindex->size);
 }
@@ -16,7 +16,7 @@ int ci_at(struct Cycle_index* cindex, int ith)
 
 
 
-//int getblank(struct Cycle_index* cidx)
+//int getblank(struct status_cyc_arr* cidx)
 //{
 //	if ((*cidx).is_reversed == 0)
 //		return (*cidx).size - ((*cidx).tail - (*cidx).head);
@@ -25,12 +25,12 @@ int ci_at(struct Cycle_index* cindex, int ith)
 //}
 //
 //
-//void update_blank(struct Cycle_index* cidx)
+//void update_blank(struct status_cyc_arr* cidx)
 //{
 //	(*cidx).blank = getblank(cidx);
 //}
 //
-//void move_cidx_head(struct Cycle_index* cidx, int move_num)
+//void move_cidx_head(struct status_cyc_arr* cidx, int move_num)
 //{
 //	if (((*cidx).head = (*cidx).head + move_num) >= (*cidx).size)
 //	{
@@ -38,7 +38,7 @@ int ci_at(struct Cycle_index* cindex, int ith)
 //		(*cidx).is_reversed = 0;
 //	}
 //}
-//void move_cidx_tail(struct Cycle_index* cidx, int move_num)
+//void move_cidx_tail(struct status_cyc_arr* cidx, int move_num)
 //{
 //	if (((*cidx).tail = (*cidx).tail + move_num) >= (*cidx).size)
 //	{

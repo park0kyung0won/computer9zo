@@ -3,13 +3,14 @@
 
 #include <stdbool.h>
 
-struct Cycle_index;
-int ci_at(struct Cycle_index* cindex, int ith);//get ith element in cycle_index
+struct status_cyc_arr;
+int ci_at(struct status_cyc_arr* cindex, int ith);//get ith element in cycle_index
 
-struct Cycle_index
+struct status_cyc_arr
 {
-	int head;//시작점 (맨 처음 원소)
-	int size;// 어레이 크기
+	int head;     // 시작점 (맨 처음 원소)
+	int occupied; // 지금 들어있는 원소의 숫자
+	int size;     // 어레이 크기
 };
 
 //void ci_move_head(struct Cycle_manage* cidx, int move_num)
