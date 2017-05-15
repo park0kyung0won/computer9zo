@@ -7,12 +7,12 @@ void fetch(int *pc, int fetch_width, int inst_length, struct INST *inst, struct 
 	int i;
 	for (i = 0; i < fetch_num && (*pc) < inst_length; i++)
 	{
-		(fetch_queue[(*idx).head]).op = (inst[*pc]).op;
-		(fetch_queue[(*idx).head]).dest = (inst[*pc]).dest;
-		(fetch_queue[(*idx).head]).oprd1 = (inst[*pc]).oprd1;
-		(fetch_queue[(*idx).head]).oprd2 = (inst[*pc]).oprd2;
+		(fetch_queue[(*idx).head + (*idx).occupied]).op = (inst[*pc]).op;
+		(fetch_queue[(*idx).head + (*idx).occupied]).dest = (inst[*pc]).dest;
+		(fetch_queue[(*idx).head + (*idx).occupied]).oprd1 = (inst[*pc]).oprd1;
+		(fetch_queue[(*idx).head + (*idx).occupied]).oprd2 = (inst[*pc]).oprd2;
 		++(*pc);
-		(*idx).head = (((*idx).head + 1) % (*idx).size); 
+		(*idx).occupied++; 
 	}
 
 }
@@ -23,20 +23,22 @@ void fetch(int *pc, int fetch_width, int inst_length, struct INST *inst, struct 
 // RS와 ROB에 넣어준다
 // (RS에 넣을 때, operand 둘 중 하나라도 Q면 time을 -1로 지정해 놓는다)
 // 그리고 output에 해당하는 RT의 RF_VALID를 수정해준다
-void decode(struct FQ* fq, struct Cycle_index* index_fq, struct RS* rs, struct RAT* rat, struct ROB* rob,struct Cycle_index* idx_rob)
+void decode(struct FQ* fq, struct status_cyc_arr *index_fq, struct RS *rs, struct RAT *rat, struct ROB *rob,struct status_cyc_arr *idx_rob)
 {
 	//regist in rob
-	rob[(*idx_rob).tail].dest = fq[(*index_fq).head].dest;
-	rob[(*idx_rob).tail].op = fq[(*index_fq).head].op;
-	rob[(*idx_rob).tail].status = P;
+	rob[(*idx_rob).head + (*idx_rob).occupied].dest = fq[(*index_fq).head].dest;
+	rob[(*idx_rob).head + (*idx_rob).occupied].op = fq[(*index_fq).head].op;
+	rob[(*idx_rob).head + (*idx_rob).occupied].status = P;
+	//(*index_fq).head = ((*index_fq).head + 1) % (*index_fq).size;
+	//(*index_fq).occupied--;
 		//rob[(*idx_rob).tail].value = 0;
 		
 	//rat change
 	rat[fq[(*index_fq).head].dest].RF_valid = false;
-	rat[fq[(*index_fq).head].dest].Q = (*idx_rob).tail;
+	rat[fq[(*index_fq).head].dest].Q = (*idx_rob).head + (*idx_rob).occupied; // Tricky
 
 	//regist in rs
-	(*rs).index_rob = (*idx_rob).tail;
+	(*rs).target_rob = (*idx_rob).head + (*idx_rob).occupied;
 	(*rs).is_valid = true;
 	(*rs).op = fq[(*index_fq).head].op;
 	if (rat[fq[(*index_fq).head].oprd1].RF_valid)
@@ -63,8 +65,11 @@ void decode(struct FQ* fq, struct Cycle_index* index_fq, struct RS* rs, struct R
 	(*rs).time_left = -1;
 	
 	//update head and tail
-	move_cidx_tail(idx_rob, 1);
-	move_cidx_head(index_fq, 1);
+	//move_cidx_tail(idx_rob, 1);
+	//move_cidx_head(index_fq, 1);
+	(*index_fq).head = ((*index_fq).head + 1) % (*index_fq).size;
+	(*index_fq).occupied--;
+	(*idx_rob).occupied++;
 }
 
 // RS를 포인터로 받아서
@@ -82,8 +87,8 @@ void issue( struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle )
 		(*rs).oprd_2.state = V;
 	}
 
-	if ((*rs).oprd_1.state == V && (*rs).oprd_2.state == V)
-	{//만약 값이 다 받아졌으면 이슈한다
+	if ((*rs).oprd_1.state == V && (*rs).oprd_2.state == V && !is_completed_this_cycle[(*rs).target_rob])
+	{//만약 값이 다 받아졌고, 이번 사이클에 완료된게 아니라면  이슈한다
 		(*rs).time_left = ((*rs).op == MemRead) ? 4 : 1;
 	}
 }
@@ -95,8 +100,8 @@ void excute_retire(struct RS* rs, struct ROB* rob, bool* is_completed_this_cycle
 {
 	if ( (--((*rs).time_left) ) < 0)//타이머를 1줄이고, 만약 0 이하라면 (ex 완료) ROB의 state를 C
 	{//ex completed in this step
-		rob[(*rs).index_rob].status = C;
-		is_completed_this_cycle[(*rs).index_rob] = true;
+		rob[(*rs).target_rob].status = C;
+		is_completed_this_cycle[(*rs).target_rob] = true;
 		(*rs).is_valid = false;
 	}
 }
@@ -124,7 +129,8 @@ void commit(struct RAT* rat, struct ROB* rob, struct status_cyc_arr *stat_rob)
 	for (i = 0; i < num_inst_to_retire; i++)
 	{
 		rat[rob[i].dest].RF_valid = true;
-		(*stat_rob).head = (((*stat_rob).head + 1) % (*stat_rob).size);	
+		(*stat_rob).head = (((*stat_rob).head + 1) % (*stat_rob).size);
+		(*stat_rob).occupied--;	
 	}	
 };
 
