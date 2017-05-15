@@ -11,72 +11,64 @@ bool read_instruction(FILE *in_filename, struct INST * out_inst)
 	return char_to_INST(buffer, out_inst);
 }
 
-bool config_reader(char* filename, struct Config *out_config)
-{
-    char buffer[5];
-    FILE *configp;
-	if ((configp = fopen(filename, "r")) == NULL) { return false; }//if configp == null, it mean fail.
-	for (int idx = 0; idx < 4; ++idx)
-	{
-		fgets(buffer, 5, configp);
-		switch (idx)
-		{
-		case 0: out_config->Dump = atoi(buffer); break;
-		case 1: out_config->Width = atoi(buffer); break;
-		case 2: out_config->ROB_size = atoi(buffer); break;
-		case 3: out_config->RS_size = atoi(buffer);
-		}
-	}
-	return true;
-	
-	//if "fgets"function cannot get any value, then while phrase would not activated. In that case this function return 0 meaning false. 
-	//if once while phrase activated, it finally goes to switch case 4 and return 1.
-}
-
-
 bool make_inst_array(char* filename, struct INST ** out_inst_arr, int *len)
 {		
 
 	printf("Instruction File Reader\n");
 	printf("Open %s ",filename);
 
-	FILE* p_file;
-	if ((p_file = fopen(filename, "r")) == NULL) { printf("- Failed \n"); return false; }//if fail to open file, return false
+	FILE* p_file = fopen(filename, "rb");
+	if (p_file== NULL) { printf("- Failed \n"); return false; }//if fail to open file, return false
 	printf("- Done \n");
 
 	//get file size
 	printf("File size = ");
 	fseek(p_file, 0, SEEK_END);
-	long int p_len = ftell(p_file);
+	int p_len = ftell(p_file);
 		//fseek(p_file, -10, SEEK_END);
 		//char tempss[10];
 		//fgets(tempss, 10, p_file);
 		//printf("%s", tempss);
 	fseek(p_file, 0, SEEK_SET);
-	printf("%ldKB\n", sizeof(char)*p_len/1024);
+	printf("%dKB\n", sizeof(char)*p_len/1024);
 
 	//all file load on memory
 	printf("Loading file on memory ");
-	char* p_file_buffer = malloc(sizeof(char)*(p_len+1));
-	fread(p_file_buffer, sizeof(char), p_len, p_file);
+	char* p_file_buffer = (char*)calloc(p_len + 1,sizeof(char));
+	if (p_file_buffer == NULL) { printf("\nLack of memory\n"); return false; }
+
+	int read_ith;
+	for  (read_ith = 0; read_ith < (p_len/4096); ++read_ith)
+	{
+		fread(p_file_buffer+(read_ith*4096), sizeof(char), 4096, p_file);
+	}
+	int temp=fread(p_file_buffer + (read_ith * 4096), sizeof(char), p_len % 4096, p_file);
+	//printf("%s-%d", p_file_buffer + (read_ith * 4096), temp);
+	//system("PAUSE");
 
 	//Make file always end \n
-	if (p_file_buffer[p_len-1] == '\n'){--p_len;}
-	else{p_file_buffer[p_len] = '\n';}
+	if (p_file_buffer[p_len-1] != '\n'){ p_file_buffer[p_len] = '\n'; ++p_len; }
 	printf("- Done \n");
 
 	//close file
 	fclose(p_file);
 	
+	//debug - check file end
+	//for (int i = 5000; i > 0; --i)
+	//{
+	//	printf(".%c",*(p_file_buffer-i+p_len));
+	//}
+
 	//Make blank instruction array
 	printf("Allocate Memory for Instruction Array");
 	int length = 0;
-	for (long int p_idx = 0; p_idx < p_len; ++p_idx)
+	for (int p_idx = 0; p_idx < p_len; ++p_idx)
 	{
 		if (p_file_buffer[p_idx]=='\n') { ++length; }
 	}//get line number 
 
 	(*out_inst_arr)=(struct INST*)malloc(sizeof(struct INST)*length);
+	if ((*out_inst_arr) == NULL) { printf("\nLack of memory\n"); return false; }
 	printf("- Done \n");
 
 	//Translate File and Fill Instruction
@@ -109,9 +101,10 @@ bool make_inst_array(char* filename, struct INST ** out_inst_arr, int *len)
 	(*len) = length;
 	printf("\b\b\b\b100%%\n");
 
+	free(p_file_buffer);
+
 	return is_worked;
 }
-
 
 bool char_to_INST(char* buffer, struct INST * out_inst)
 {
@@ -139,6 +132,30 @@ bool char_to_INST(char* buffer, struct INST * out_inst)
 
 	return true;
 }
+
+
+bool config_reader(char* filename, struct Config *out_config)
+{
+	char buffer[5];
+	FILE *configp;
+	if ((configp = fopen(filename, "r")) == NULL) { return false; }//if configp == null, it mean fail.
+	for (int idx = 0; idx < 4; ++idx)
+	{
+		fgets(buffer, 5, configp);
+		switch (idx)
+		{
+		case 0: out_config->Dump = atoi(buffer); break;
+		case 1: out_config->Width = atoi(buffer); break;
+		case 2: out_config->ROB_size = atoi(buffer); break;
+		case 3: out_config->RS_size = atoi(buffer);
+		}
+	}
+	return true;
+
+	//if "fgets"function cannot get any value, then while phrase would not activated. In that case this function return 0 meaning false. 
+	//if once while phrase activated, it finally goes to switch case 4 and return 1.
+}
+
 
 void main()
 {

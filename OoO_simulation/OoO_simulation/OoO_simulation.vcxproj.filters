@@ -6,8 +6,8 @@
     <ClInclude Include="..\..\fileread.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\datattypes.c" />
     <ClCompile Include="..\..\cycleindex.c" />
     <ClCompile Include="..\..\fileread.c" />
+    <ClCompile Include="..\..\datatypes.c" />
   </ItemGroup>
 </Project>

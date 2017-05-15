@@ -25,7 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\cycleindex.c" />
-    <ClCompile Include="..\..\datattypes.c" />
+    <ClCompile Include="..\..\datatypes.c" />
     <ClCompile Include="..\..\fileread.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
