@@ -19,20 +19,20 @@ struct RS;//Reservation Staton
 struct ROB;// Reorder Buffer
 
 //for debuging
-void INST_printer(struct INST* printed); 
-void FQ_printer(struct FQ* printed); 
-void Config_printer(struct Config* printed); 
-void RAT_printer(struct RAT* printed); 
-void RS_printer(struct RS* printed);
-void ROB_printer(struct ROB* printed);
+void INST_printer(const struct INST* printed); 
+void FQ_printer(const struct FQ* printed);
+void Config_printer(const struct Config* printed);
+void RAT_printer(const struct RAT* printed);
+void RS_printer(const struct RS* printed);
+void ROB_printer(const struct ROB* printed);
 
 //for reporting
-void INST_printer(struct INST* printed, FILE* fileID);
-void FQ_printer(struct FQ* printed, FILE* fileID);
-void Config_printer(struct Config* printed, FILE* fileID);
-void RAT_printer(struct RAT* printed, FILE* fileID);
-void RS_printer(struct RS* printed, FILE* fileID);
-void ROB_printer(struct ROB* printed, FILE* fileID);
+//void INST_printer(struct INST* printed, FILE* fileID);
+//void FQ_printer(struct FQ* printed, FILE* fileID);
+//void Config_printer(struct Config* printed, FILE* fileID);
+//void RAT_printer(struct RAT* printed, FILE* fileID);
+void RS_fprinter(const struct RS* printed, FILE* fileID);
+void ROB_fprinter(const struct ROB* printed, FILE* fileID);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
