@@ -6,6 +6,16 @@ int ci_at(struct Cycle_index* cindex, int ith)
 }
 
 
+
+
+
+
+
+
+
+
+
+
 //int getblank(struct Cycle_index* cidx)
 //{
 //	if ((*cidx).is_reversed == 0)
