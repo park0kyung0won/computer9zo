@@ -19,18 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\cycleindex.h" />
-    <ClInclude Include="..\..\datatypes.h" />
-    <ClInclude Include="..\..\fileread.h" />
+    <ClInclude Include="..\..\data_structures.h" />
+    <ClInclude Include="..\..\file_read.h" />
+    <ClInclude Include="..\..\simulator.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\cycleindex.c" />
-    <ClCompile Include="..\..\datatypes.c" />
-    <ClCompile Include="..\..\fileread.c" />
+    <ClCompile Include="..\..\data_structures.c" />
+    <ClCompile Include="..\..\file_read.c" />
     <ClCompile Include="..\..\main.c" />
-    <ClCompile Include="..\..\simul.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\..\simulator.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EF92D9D5-9E04-492D-9A20-BF023DF30EB3}</ProjectGuid>

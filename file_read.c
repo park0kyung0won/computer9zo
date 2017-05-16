@@ -1,4 +1,4 @@
-#include "fileread.h"
+#include "file_read.h"
 
 bool char_to_INST(char* buffer, struct INST * out_inst);
 
@@ -115,28 +115,28 @@ bool char_to_INST(char* buffer, struct INST * out_inst)
 	switch (inst_name[3])
 	{
 	case 'A':
-		out_inst->op = IntAlu;
+		out_inst->opcode = IntAlu;
 		break;
 	case 'R':
-		out_inst->op = MemRead;
+		out_inst->opcode = MemRead;
 		break;
 	case 'W':
-		out_inst->op = MemWrite;
+		out_inst->opcode = MemWrite;
 		break;
 	default:
 		printf("Instruction read failed \n");
 		return false;
 	}
 	out_inst->dest = atoi(strtok(NULL, " "));
-	out_inst->oprd1 = atoi(strtok(NULL, " "));
-	out_inst->oprd2 = atoi(strtok(NULL, " "));
+	out_inst->oprd_1 = atoi(strtok(NULL, " "));
+	out_inst->oprd_2 = atoi(strtok(NULL, " "));
 	//if (out_inst->op != IntAlu) { out_inst->oprd2 = atoi(strtok(NULL, " ")); }
 
 	return true;
 }
 
 
-bool config_reader(char* filename, struct Config *out_config)
+bool config_reader(char* filename, struct CONFIG *out_config)
 {
 	char buffer[5];
 	FILE *configp;
