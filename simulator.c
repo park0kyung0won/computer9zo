@@ -18,7 +18,7 @@ static int cnt_MemWrite = 0;
 struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int arr_inst_len);
 
 void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct INST *arr_inst);
-void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status);
+void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status, int i);
 
 void issue(struct CONFIG *config, struct RS *rs_ele);
 void execute(struct CONFIG *config, struct RS *rs_ele, bool *is_issued_this_cycle, int i);
@@ -213,14 +213,15 @@ void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_s
 	}
 }
 
-void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status)
+void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status, int i)
 {
+	// Decode only when: 1) fq is not empty. 2) Upto N instructions. 3) ROB has empty place
 	if ((*fq_status).occupied > 0 && decoded < (*config).Width && (*rob_status).occupied < (*rob_status).size)
 	{
 		// Putting first element of Fetch Queue to Reservation Station	
 		(*rs_ele).is_valid = true;
-		(*rs_ele).time_decoded = cycle;
 		(*rs_ele).opcode = fetch_queue[(*fq_status).head].opcode;
+
 		// Count Instruction number
 		switch ((*rs_ele).opcode)
 		{
@@ -259,10 +260,12 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 
 		(*rs_ele).time_left = -1; // Waiting to be issued
 
-								  // Putting first element of Fetch Queue to ROB
+		// Putting first element of Fetch Queue to ROB
 		rob[ca_next_pos(rob_status)].opcode = fetch_queue[(*fq_status).head].opcode;
 		rob[ca_next_pos(rob_status)].dest = fetch_queue[(*fq_status).head].dest;
+		rob[ca_next_pos(rob_status)].rs_dest = i;
 		rob[ca_next_pos(rob_status)].status = P;
+		(*rs_ele).rob_dest = ca_next_pos(rob_status);
 
 		// Modify RAT status
 		if (fetch_queue[(*fq_status).head].dest != 0)
