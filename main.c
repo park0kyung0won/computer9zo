@@ -100,25 +100,25 @@ int main(int argc, char* argv[])
 	printf("Total %3d Config and %3d Instruction finded\n", conf_len, inst_len);
 	//읽을 파일의 개수와 경로 파악 끝
 
-	//
-	// simulate and for every config combination
-	//
-
-
 	//config 파일을 읽어 저장
 	struct CONFIG* configs;
 	configs = malloc(sizeof(struct CONFIG)*(conf_len));
-	
+
 	int for_ignore = 0;
 	for (int idx = 0; idx < conf_len; ++idx)
 	{
 		if (!config_reader(conf_name[idx], configs + idx - for_ignore))
 		{
-			printf("Cannot find file %s\n", conf_name[idx]); 
+			printf("Cannot find file %s\n", conf_name[idx]);
 			++for_ignore;
 		}
 	}
 	conf_len -= for_ignore;
+
+
+	//
+	// simulate and for every config combination
+	//
 
 	//inst 파일은 필요할 때 한개씩 읽어 저장
 	struct INST* inst_arr; int inst_arr_len;
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 			FILE* f_report = fopen(out_filename, "w");
 			struct REPORT* report;
 
-			//시뮬레이션 (DUMP일 경우 시뮬레이션 도중도 보고서 출력)
+			//시뮬레이션
 			report = core_simulator(configs + conf_idx, inst_arr, inst_arr_len, f_report);//simulate
 
 			//보고서 출력

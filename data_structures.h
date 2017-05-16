@@ -98,7 +98,6 @@ struct RAT//Register AT
 
 struct RS//Res Staton
 {
-	int time_decoded;
 	int rob_dest;
 	bool is_valid; // Busy or not
 	enum instruction opcode;
@@ -128,6 +127,7 @@ struct ROB// Reorder Buffer
 	enum instruction opcode; // operation
 	int dest; // Destination ( Must point to one of elements in reg[16] !
 	enum is_complete status; // status = P; means pending, status = C; means completed
+	int rs_dest;//linked RS index
 };
 
 
