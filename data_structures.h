@@ -128,6 +128,7 @@ struct ROB// Reorder Buffer
 	enum instruction opcode; // operation
 	int dest; // Destination ( Must point to one of elements in reg[16] !
 	enum is_complete status; // status = P; means pending, status = C; means completed
+	int RS_ref; // RS entry which has this block for ROB_dest.
 };
 
 
