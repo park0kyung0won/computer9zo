@@ -158,6 +158,21 @@ bool config_reader(char* filename, struct Config *out_config)
 	//if once while phrase activated, it finally goes to switch case 4 and return 1.
 }
 
+char* get_filename(char* filepath)
+{
+	char* file_name = filepath;//all path
+	for (int filename_idx = strlen(filepath); filename_idx >= 0; --filename_idx)//파일 명만 찾아서 추출
+	{
+		if (*(filepath + filename_idx) == '\\')// find last path
+		{
+			file_name = filepath + filename_idx + 1;
+			break;
+		}
+	}
+	return file_name;
+}
+
+
 //
 //void main()
 //{

@@ -1,3 +1,4 @@
-﻿  fileread.c
+﻿  main.c
+f:\deposit\local git\computer9zo\main.c(21): warning C4129: 'm': unrecognized character escape sequence
   OoO_simulation.vcxproj -> F:\Deposit\Local Git\computer9zo\OoO_simulation\Debug\OoO_simulation.exe
   OoO_simulation.vcxproj -> F:\Deposit\Local Git\computer9zo\OoO_simulation\Debug\OoO_simulation.pdb (Partial PDB)

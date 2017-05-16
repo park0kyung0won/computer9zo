@@ -10,5 +10,6 @@
     <ClCompile Include="..\..\fileread.c" />
     <ClCompile Include="..\..\datatypes.c" />
     <ClCompile Include="..\..\main.c" />
+    <ClCompile Include="..\..\simul.c" />
   </ItemGroup>
 </Project>
