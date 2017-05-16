@@ -57,9 +57,10 @@ void ROB_printer(const struct ROB* printed)
 {
 	if (printed->dest > 0)
 	{
-		printf("%-10s  ", instruction_name[printed->opcode]);
-		printf("R%-5d   ", printed->dest);
-		printf("%c    ", (printed->status==C)?'C':'P');
+		printf("%-10s", instruction_name[printed->opcode]);
+		printf("R%-5d ", printed->dest);
+		printf("%c  ", (printed->status==C)?'C':'P');
+		printf("RS%-4d", printed->dest);
 	}
 	else
 		printf("                          ");
@@ -73,27 +74,23 @@ void FQ_arr_printer(const struct FQ* fq, struct CA_status fq_status)
 	int idx;
 	for (idx = 0; idx < fq_status.size; ++idx)
 	{
+		printf("| FQ%-4d: ", idx + 1);
+
 		if (idx < fq_status.occupied)
-		{
+		{//데이터가 있으면 출력한다.
 			fq_idx = fq + ((fq_status.head + idx) % fq_status.size);
-			printf("| FQ%-4d: ", idx + 1);
 			FQ_printer(fq_idx);
 		}
-		else
-		{
-			printf("| FQ%-4d:                          ", idx + 1);
+		else 
+		{//실제 원소 개수 이상의 공간은 쓰레기값이므로 공백을 출력한다.
+			printf("                         "); 
 		}
-		printf(" ", idx + 1);
+
+		printf(" ");
 		
-		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1)
-		{
-			printf("|\n");
-		}
+		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1) {printf("|\n");	}//줄바꿈을 위한 구문
 	}
-	if (idx % DUMP_WIDTH != 0)
-	{
-		printf("\n");
-	}
+	if (idx % DUMP_WIDTH != 0) {printf("\n");}//DUMP_WIDTH 배수가 아닌 경우. 구분을 위해 줄바꿈을 한번 해준다.
 }
 
 void RAT_arr_printer(const struct RAT* rat, int rat_size)
@@ -103,43 +100,35 @@ void RAT_arr_printer(const struct RAT* rat, int rat_size)
 	int idx;
 	for (idx = 0; idx < rat_size-1; ++idx)
 	{
+		//레지스터 0번은 존재하지 않는 주소(상수)이므로, 1번부터 출력한다..
 		rat_idx = rat + (idx+1);
 		printf("| R%-4d : ", idx);
 		RAT_printer(rat_idx);
+		printf(" ");
 
-		printf(" ", idx + 1);
-		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1)
-		{
-			printf("|\n");
-		}
+		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1) { printf("|\n"); }//줄바꿈을 위한 구문
 	}
-	if (idx % DUMP_WIDTH != 0)
-	{
-		printf("\n");
-	}
+	if (idx % DUMP_WIDTH != 0) { printf("\n"); }//DUMP_WIDTH 배수가 아닌 경우. 구분을 위해 줄바꿈을 한번 해준다.
 }
 
 void RS_arr_printer(struct RS *rs, int rs_size)
 {
 	printf("Reservation station\n");
-	struct RS *rs_idx = NULL;
+
+	struct RS *rs_idx = NULL;//편의를 위한 임시 저장 변수
 	int idx;
+
 	for (idx = 0; idx < rs_size; ++idx)
-	{
+	{//모든 RS를 출력한다.
 		rs_idx = rs + (idx);
 		printf("| RS%-4d : ", idx + 1);
 		RS_printer(rs_idx);
 
-		printf("        ", idx + 1);
-		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1)
-		{
-			printf("|\n");
-		}
+		printf(" ");
+
+		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1) { printf("|\n"); }//줄바꿈을 위한 구문
 	}
-	if (idx % DUMP_WIDTH != 0)
-	{
-		printf("\n");
-	}
+	if (idx % DUMP_WIDTH != 0) { printf("\n"); }//DUMP_WIDTH 배수가 아닌 경우. 구분을 위해 줄바꿈을 한번 해준다.
 }
 
 void ROB_arr_printer(const struct ROB *rob, struct CA_status rob_status)
@@ -150,48 +139,78 @@ void ROB_arr_printer(const struct ROB *rob, struct CA_status rob_status)
 	int idx;
 	for (idx = 0; idx < rob_status.size; ++idx)
 	{
-		rob_idx = rob + ((rob_status.head + idx) % rob_status.size);
 		printf("| ROB%-4d: ", idx + 1);
-		ROB_printer(rob_idx);
-		printf(" ID%-4d", (rob_status.head + idx) % rob_status.size);
-
-		printf(" ", idx + 1);
-		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1)
-		{
-			printf("|\n");
+		if (idx < rob_status.occupied)
+		{//데이터가 있으면 출력한다.
+			rob_idx = rob + ((rob_status.head + idx) % rob_status.size);
+			ROB_printer(rob_idx);
 		}
+		else
+		{//실제 원소 개수 이상의 공간은 쓰레기값이므로 공백을 출력한다.
+			printf("                          ");
+		}
+
+		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1) { printf("|\n"); }//줄바꿈을 위한 구문
 	}
-	if (idx % DUMP_WIDTH != 0)
-	{
-		printf("\n");
-	}
+	if (idx % DUMP_WIDTH != 0) { printf("\n"); }//DUMP_WIDTH 배수가 아닌 경우. 구분을 위해 줄바꿈을 한번 해준다.
 }
 
 //for reporting
-void RS_fprinter(const struct RS* printed, FILE* fileID)
+void RS_reporter(const struct RS* printed)
 {
 	if (printed->is_valid)
 	{
-		fprintf(fileID,"ROB%-5d", printed->rob_dest+1);
-		(printed->oprd_1.state == V) ? fprintf(fileID,"    V") : fprintf(fileID,"%5d",printed->oprd_1.data.q);
-		(printed->oprd_2.state == V) ? fprintf(fileID, "    V") : fprintf(fileID, "%5d", printed->oprd_2.data.q);
-		fprintf(fileID, "\n");
+		printf("ROB%-5d", printed->rob_dest+1);
+		(printed->oprd_1.state == V) ? printf("    V") : printf("%5d",printed->oprd_1.data.q);
+		(printed->oprd_2.state == V) ? printf("    V") : printf("%5d", printed->oprd_2.data.q);
 	}
 	else
-		fprintf(fileID,"BLANK       -    -\n");
+		printf("ROB0        0    0");
 }
-
-void ROB_fprinter(const struct ROB* printed, FILE* fileID)
+void ROB_reporter(const struct ROB* printed)
 {
 	if (printed->dest > 0)
-		fprintf(fileID,"%c\n", (printed->status==C)?'C':'P');
+		printf("%c", (printed->status==C)?'C':'P');
 	else
-		fprintf(fileID,"P\n");
+		printf("P");
+}
+void RS_arr_reporter(struct RS *rs, int rs_size)
+{
+	struct RS *rs_idx = NULL;
+	int idx;
+	for (idx = 0; idx < rs_size; ++idx)
+	{
+		rs_idx = rs + (idx);
+		printf("RS%-4d : ", idx + 1);
+		RS_reporter(rs_idx);
+		printf("\n");
+	}
+}
+void ROB_arr_reporter(const struct ROB *rob, struct CA_status rob_status)
+{
+	struct ROB *rob_idx = NULL;
+	int idx;
+	for (idx = 0; idx < rob_status.size; ++idx)
+	{
+		printf("ROB%-4d: ", idx + 1);
+		
+		if (idx < rob_status.occupied)
+		{
+			rob_idx = rob + ((rob_status.head + idx) % rob_status.size);
+			ROB_reporter(rob_idx);
+		}
+		else
+		{
+			printf("P");
+		}
+		printf("\n");
+
+	}
 }
 
 void REPORT_fprinter(const struct REPORT* printed, FILE* fileID)
 {
-	fprintf(fileID, "%15s%d\n", "Cycles",printed->Cycles);
+	fprintf(fileID, "%15s%d\n", "Cycles", printed->Cycles);
 	fprintf(fileID, "%15s%f\n", "IPC", printed->IPC);
 	fprintf(fileID, "%15s%d\n", "Total Insts", printed->Total_Insts);
 	fprintf(fileID, "%15s%d\n", "IntAlu", printed->IntAlu);
@@ -199,31 +218,6 @@ void REPORT_fprinter(const struct REPORT* printed, FILE* fileID)
 	fprintf(fileID, "%15s%d\n", "MemWrite", printed->MemWrite);
 }
 
-void RS_arr_fprinter(struct RS *rs, int rs_size, FILE* fileID)
-{
-	struct RS *rs_idx = NULL;
-	int idx;
-	for (idx = 0; idx < rs_size; ++idx)
-	{
-		rs_idx = rs + (idx);
-		fprintf(fileID,"RS%-4d : ", idx + 1);
-		RS_fprinter(rs_idx, fileID);
-		fprintf(fileID, "\n");
-	}
-}
-
-void ROB_arr_fprinter(const struct ROB *rob, struct CA_status rob_status, FILE* fileID)
-{
-	struct ROB *rob_idx = NULL;
-	int idx;
-	for (idx = 0; idx < rob_status.size; ++idx)
-	{
-		rob_idx = rob + ((rob_status.head + idx) % rob_status.size);
-		printf(fileID,"ROB%-4d: ", idx + 1);
-		ROB_fprinter(rob_idx, fileID);
-		fprintf(fileID, "\n");
-	}
-}
 
 //for ca using
 void ca_cnt_push(struct CA_status *status)
@@ -239,7 +233,7 @@ void ca_cnt_pop(struct CA_status *status)
 
 int ca_next_pos(struct CA_status *status)
 {
-	return (*status).head + (*status).occupied;
+	return ( (*status).head + (*status).occupied ) % (*status).size ;
 }
 
 

@@ -33,12 +33,12 @@ void RS_arr_printer(struct RS *rs, int rs_size);
 void ROB_arr_printer(const struct ROB *rob, struct CA_status rob_status);
 
 //for reporting
-void RS_fprinter(const struct RS* printed, FILE* fileID);
-void ROB_fprinter(const struct ROB* printed, FILE* fileID);
-void REPORT_fprinter(const struct REPORT* printed, FILE* fileID);
+void RS_reporter(const struct RS* printed);
+void ROB_reporter(const struct ROB* printed);
+void RS_arr_reporter(struct RS *rs, int rs_size);
+void ROB_arr_reporter(const struct ROB *rob, struct CA_status rob_status);
 
-void RS_arr_fprinter(struct RS *rs, int rs_size, FILE* fileID);
-void ROB_arr_fprinter(const struct ROB *rob, struct CA_status rob_status, FILE* fileID);
+void REPORT_fprinter(const struct REPORT* printed, FILE* fileID);
 
 //for ca
 void ca_cnt_push(struct CA_status *status);
