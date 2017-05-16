@@ -21,7 +21,7 @@ void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_s
 void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status);
 
 void issue(struct CONFIG *config, struct RS *rs_ele);
-void execute(struct CONFIG *config, struct RS *rs_ele, bool *is_issued_this_cycle, int i);
+void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle);
 void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status, struct RS *rs);
 
 void wait(void);
@@ -62,10 +62,6 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	struct RS* rs = calloc((*config).RS_size, sizeof(struct RS)); //struct RS rs[(*config).RS_size];
 	for (i = 0; i < (*config).RS_size; i++) { rs[i].is_valid = false; }//initialize
 
-	// Issue waiting list
-	struct RS* issuewait_list = calloc((*config).RS_size, sizeof(struct RS)); //struct RS issuewait_list[(*config).RS_size];
-	int* issuewait_reference = calloc((*config).RS_size, sizeof(int));//int issuewait_reference[(*config).RS_size];
-
 	// is_completed_this_cycle? to prevent issue of insturction in RS which has V value promoted from Q in current cycle.
 	bool* is_completed_this_cycle = calloc((*config).RS_size, sizeof(bool));//bool is_completed_this_cycle[(*config).ROB_size];
 	
@@ -82,20 +78,19 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 		decoded = 0;
 		issued = 0;
 
-		//머리에서 up to N까지 C들을 커밋
+		// Flush is_completed_this_cycle array
+		for (i = 0; i < (*config).RS_size; i++) { is_completed_this_cycle[i] = false; }
+
+		//////////////////////////////////////////////////////////////Loop1
+		//ROB를 rob_status.occupied만큼 돌면서 commit/ (ex/issue) 실행
+
 		commit(config, rob, &rob_status, rat);
 
 		ex_and_issue(config, rob, &rob_status, rs);
 
-		for (i = 0; i < rob_status.occupied; i++)
-
-		for (i = 0; i < rob_status.; i++)
-		{
-			is_completed_this_cycle[i] = false; // Flush is_completed_this_cycle array
-			
-			if(i < (*config).)
-		}
 		
+		//////////////////////////////////////////////////////////////
+
 		// Issue older instructions first
 		for (i = 0; i < issueWaiting && i < (*config).Width; i++)
 		{
@@ -155,13 +150,13 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 			case 0:
 				break;
 			case 1:
-				fprintf(f_report,"= Cycle %-5d\n", cycle);
-				ROB_arr_fprinter(rob, rob_status, f_report);
+				printf("= Cycle %-5d\n", cycle);
+				ROB_arr_reporter(rob, rob_status);
 				break;
 			case 2:
-				fprintf("= Cycle %-5d\n", cycle);
-				RS_arr_fprinter(rs, (*config).RS_size,f_report);
-				ROB_arr_fprinter(rob, rob_status, f_report);
+				printf("= Cycle %-5d\n", cycle);
+				RS_arr_reporter(rs, (*config).RS_size);
+				ROB_arr_reporter(rob, rob_status);
 				break;
 			default:
 				printf("= Cycle %-5d\n", cycle);
@@ -180,12 +175,11 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	//free array
 	free(fetch_queue);
 	free(rs);
-	free(issuewait_list);
-	free(issuewait_reference);
-	free(is_completed_this_cycle);
-	free(is_issued_this_cycle);
 	free(rob);
+
+	free(is_completed_this_cycle);
 	
+
 	// Write a report
 	struct REPORT *ptr_report = malloc(sizeof(struct REPORT));
 	(*ptr_report).Cycles = cycle;
@@ -194,6 +188,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	(*ptr_report).MemRead = cnt_MemRead;
 	(*ptr_report).MemWrite = cnt_MemWrite;
 	(*ptr_report).IPC = ((double)inst_length / (double) cycle);
+
 
 	return ptr_report;	
 }
@@ -313,38 +308,56 @@ if ((*rs_ele).oprd_1.state && (*rs_ele).oprd_2.state && !is_completed_this_cycle
 }
 issued++;
 }*/
-void execute(struct CONFIG *config, struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle)
+void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle)
 {
 	//if ( executed < (*config).Width)
 	//이미 이슈가 최대 N개까지 가능하기 때문에, ex도 최대 N개까지만 수행된다. 검사필요 없음
 
-	if (rs_ele->time_left>0)
-	{//만약 issue가 되어있다면,
-		--(rs_ele->time_left);//ALU에 넣는다 ( 실행 대기 단계 ).
-	}
-	else if (rs_ele->time_left == 0)
+	if (rs_ele->time_left == 0)
 	{//만약 실행 대기중이라면, 실행하고 RS를 비운 다음 ROB를 C 상태로 바꾼다.
 		
 		(rs_ele->is_valid) = false;
+		(*is_completed_this_cycle) = true;
 		(rob_ele->status) = C;
-
 	}
+	else
+	{//만약 issue가 되어있다면,
+		--(rs_ele->time_left);//ALU에 넣는다 ( 실행 대기 단계 ).
+	}
+
 }
 
-void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status, struct RS *rs)
+void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status, struct RS *rs, bool *is_completed_this_cycle)
 {
 	int i;
 	struct ROB * rob_ele;
-
+	struct RS  * rs_ele;
 	for (i = 0; i < (rob_status->occupied); ++i)
-	{//모든 원소에 대해,
+	{//모든 원소에 대해, 검사한다
 
 		rob_ele = rob + ((rob_status->head + i) % rob_status->size);
-		if (rob_ele->)
+		if (rob_ele->status == P)
+		{//만약 상태가 P라면, 이는 issue의 대상과 ex의 대상을 포함한다.
+			
+			rs_ele = (rs + (rob_ele->rs_dest));
+
+			if (rs_ele->time_left >= 0)
+			{//만약 Issue 되었다면
+				execute(rs + (rob_ele->rs_dest), rob_ele, is_completed_this_cycle + (rob_ele->rs_dest));
+				//실행 및 실행 완료한다.
+			}
+			else
+			{//만약 Issue 안되었다면
+				issue(config, rs_ele);
+				//이슈 조건을 검사하고 부합할 경우 이슈한다.
+			}
+
+		}
 
 	}
 
 }
+
 void wait(void)
 {
 }
