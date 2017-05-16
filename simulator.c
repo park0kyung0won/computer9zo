@@ -22,7 +22,7 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 
 void issue(struct CONFIG *config, struct RS *rs_ele);
 void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle);
-void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status, struct RS *rs);
+void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status, struct RS *rs, bool *is_completed_this_cycle);
 
 void wait(void);
 void rs_retire(struct RS *rs_ele, struct ROB *rob);
