@@ -1,3 +1,1 @@
-﻿  simulator.c
-  OoO_simulation.vcxproj -> D:\Deposit\github\computer9zo\OoO_simulation\Debug\OoO_simulation.exe
-  OoO_simulation.vcxproj -> D:\Deposit\github\computer9zo\OoO_simulation\Debug\OoO_simulation.pdb (Partial PDB)
+﻿cl : 명령줄 error D8016: '/O2'과(와) '/RTC1' 명령줄 옵션이 호환되지 않습니다.

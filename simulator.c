@@ -8,9 +8,10 @@ static int inst_length;
 static int pc = 0;
 static int cycle = 1;
 
+static int fetch_blank = 0;
 static int decoded = 0;
 static int issued = 0;
-static int issueWaiting = 0;
+static int ROB_blank = 0;
 static int cnt_IntAlu = 0;
 static int cnt_MemRead = 0;
 static int cnt_MemWrite = 0;
@@ -35,14 +36,16 @@ void commit(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status
 
 struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int arr_inst_len)
 {
+	//출력을 위한 공백 확보
+	printf("\n");
+
 	//파일 내 글로벌 초기화
 	pc = 0;
-	cycle = 1;
+	cycle = 0;
 	inst_length = arr_inst_len;
 
 	decoded = 0;
 	issued = 0;
-	issueWaiting = 0;
 	cnt_IntAlu = 0;
 	cnt_MemRead = 0;
 	cnt_MemWrite = 0;
@@ -74,9 +77,14 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	rob_status.head = 0;
 	rob_status.occupied = 0;
 	
-	while (pc < inst_length)
+	do
 	{	
+		//cycle pluse
+		cycle++;
+
 		//각 명령의 실행 횟수를 초기화한다.
+		fetch_blank = (fq_status.size - fq_status.occupied);//패치큐가 얼마나 비었는지 확인
+		ROB_blank = (rob_status.size - rob_status.occupied);//ROB가 얼마나 비었는지 확인
 		decoded = 0;
 		issued = 0;
 
@@ -100,6 +108,12 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 		switch ((*config).Dump)
 		{
 		case 0:
+			//지겨움 방지
+			if (pc % (inst_length / 100) == 0)
+			//if (cycle> 250000)
+			{
+				printf("%3d%%\b\b\b\b", pc*100 / inst_length);
+			}
 			break;
 		case 1:
 			printf("= Cycle %-5d\n", cycle);
@@ -120,9 +134,11 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 			wait();
 			break;
 		}
-		cycle++;
+		
 
-	}
+
+	} while (fq_status.occupied>0 || rob_status.occupied > 0);
+
 	// Simulation finished
 	
 	//free array
@@ -149,7 +165,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 
 void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct INST *arr_inst)
 {
-	int fetch_num = ((*config).Width > (*fq_status).size - (*fq_status).occupied) ? (*fq_status).size - (*fq_status).occupied : (*config).Width;
+	int fetch_num = ((*config).Width > fetch_blank) ? fetch_blank : (*config).Width;
 	int i;
 	for (i = 0; i < fetch_num && pc < inst_length; i++)
 	{
