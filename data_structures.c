@@ -35,17 +35,17 @@ void RAT_printer(const struct RAT* printed)
 		printf("%5d", printed->Q+1);
 }
 
-void RS_printer(const struct RS* printed)
+void RS_printer(const struct RS* printed, struct CA_status* rob_status)
 {
 	if (printed->is_valid)
 	{
-		printf("ROB%-5d", printed->rob_dest+1);
+		printf("ROB%-5d", ca_get_cidx(printed->rob_dest, rob_status) + 1);
 		
 		if (printed->oprd_1.state == V){printf("V     ");}
-		else{printf("Q:%-3d ", printed->oprd_1.data.q);}		
+		else { printf("Q:%-3d ", ca_get_cidx(printed->oprd_1.data.q, rob_status) + 1); }
 		
 		if (printed->oprd_2.state == V) { printf("V     "); }
-		else { printf("Q:%-3d ", printed->oprd_2.data.q); }
+		else { printf("Q:%-3d ", ca_get_cidx(printed->oprd_2.data.q, rob_status) + 1); }
 
 		printf("left%2d", printed->time_left);
 	}
@@ -106,7 +106,7 @@ void RAT_arr_printer(const struct RAT* rat, int rat_size)
 	if (idx % DUMP_WIDTH != 0) { printf("\n"); }//DUMP_WIDTH 배수가 아닌 경우. 구분을 위해 줄바꿈을 한번 해준다.
 }
 
-void RS_arr_printer(const struct RS *rs, int rs_size)
+void RS_arr_printer(const struct RS *rs, int rs_size, struct CA_status* rob_status)
 {
 	printf("Reservation station\n");
 
@@ -117,7 +117,7 @@ void RS_arr_printer(const struct RS *rs, int rs_size)
 	{//모든 RS를 출력한다.
 		rs_idx = rs + (idx);
 		printf("| RS%-4d : ", idx + 1);
-		RS_printer(rs_idx);
+		RS_printer(rs_idx, rob_status);
 
 		printf(" ");
 
@@ -151,13 +151,13 @@ void ROB_arr_printer(const struct ROB *rob, struct CA_status rob_status)
 }
 
 //for reporting
-void RS_reporter(const struct RS* printed)
+void RS_reporter(const struct RS* printed, struct CA_status * rob_status)
 {
 	if (printed->is_valid)
 	{
-		printf("ROB%-5d", printed->rob_dest+1);
-		(printed->oprd_1.state == V) ? printf("    V") : printf("%5d",printed->oprd_1.data.q);
-		(printed->oprd_2.state == V) ? printf("    V") : printf("%5d", printed->oprd_2.data.q);
+		printf("ROB%-5d", ca_get_cidx(printed->rob_dest, rob_status)+1);
+		(printed->oprd_1.state == V) ? printf("    V") : printf("%5d", ca_get_cidx(printed->oprd_1.data.q, rob_status) + 1);
+		(printed->oprd_2.state == V) ? printf("    V") : printf("%5d", ca_get_cidx(printed->oprd_2.data.q, rob_status) + 1);
 	}
 	else
 		printf("ROB0        0    0");
@@ -175,7 +175,7 @@ void REPORT_reporter(const struct REPORT* printed)
 	printf("%15s%d\n", "MemRead", printed->MemRead);
 	printf("%15s%d\n", "MemWrite", printed->MemWrite);
 }
-void RS_arr_reporter(const struct RS *rs, int rs_size)
+void RS_arr_reporter(const struct RS *rs, int rs_size, struct CA_status * rob_status)
 {
 	struct RS *rs_idx = NULL;
 	int idx;
@@ -183,7 +183,7 @@ void RS_arr_reporter(const struct RS *rs, int rs_size)
 	{
 		rs_idx = rs + (idx);
 		printf("RS%-4d : ", idx + 1);
-		RS_reporter(rs_idx);
+		RS_reporter(rs_idx, rob_status);
 		printf("\n");
 	}
 }
@@ -237,7 +237,10 @@ int ca_next_pos(struct CA_status *status)
 	return ( (*status).head + (*status).occupied ) % (*status).size ;
 }
 
-
+int ca_get_cidx(int idx, struct CA_status *status)
+{
+	return ( idx - (*status).head + (*status).size ) % (*status).size;
+}
 
 //
 //#include <stdlib.h>

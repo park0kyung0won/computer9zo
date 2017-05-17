@@ -24,19 +24,19 @@ void INST_printer(const struct INST* printed);
 void FQ_printer(const struct FQ* printed);
 void Config_printer(const struct CONFIG* printed);
 void RAT_printer(const struct RAT* printed);
-void RS_printer(const struct RS* printed);
+void RS_printer(const struct RS* printed, struct CA_status* rob_status);
 void ROB_printer(const struct ROB* printed);
 
 void FQ_arr_printer(const struct FQ* fq, struct CA_status fq_status);
 void RAT_arr_printer(const struct RAT* rat, int rat_size);
-void RS_arr_printer(const struct RS *rs, int rs_size);
+void RS_arr_printer(const struct RS *rs, int rs_size,struct CA_status* rob_status);
 void ROB_arr_printer(const struct ROB *rob, struct CA_status rob_status);
 
 //for reporting
-void RS_reporter(const struct RS* printed);
+void RS_reporter(const struct RS* printed, struct CA_status* rob_status);
 void ROB_reporter(const struct ROB* printed);
 void REPORT_reporter(const struct REPORT* printed);
-void RS_arr_reporter(const struct RS *rs, int rs_size);
+void RS_arr_reporter(const struct RS *rs, int rs_size, struct CA_status* rob_status);
 void ROB_arr_reporter(const struct ROB *rob, struct CA_status rob_status);
 
 void REPORT_fprinter(const struct REPORT* printed, FILE* fileID);
@@ -45,6 +45,7 @@ void REPORT_fprinter(const struct REPORT* printed, FILE* fileID);
 void ca_cnt_push(struct CA_status *status);
 void ca_cnt_pop(struct CA_status *status);
 int ca_next_pos(struct CA_status *status);
+int ca_get_cidx(int idx,struct CA_status *status);//진짜 어레이 인덱스를 head부터의 거리로 바꿈
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

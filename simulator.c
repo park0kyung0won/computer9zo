@@ -107,7 +107,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 			break;
 		case 2:
 			printf("= Cycle %-5d\n", cycle);
-			RS_arr_reporter(rs, (*config).RS_size);
+			RS_arr_reporter(rs, (*config).RS_size, &rob_status);
 			ROB_arr_reporter(rob, rob_status);
 			break;
 		default:
@@ -115,7 +115,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 			printf("= Cycle %-5d\n", cycle);
 			FQ_arr_printer(fetch_queue, fq_status);
 			RAT_arr_printer(rat, 17);
-			RS_arr_printer(rs, (*config).RS_size);
+			RS_arr_printer(rs, (*config).RS_size, &rob_status);
 			ROB_arr_printer(rob, rob_status);
 			wait();
 			break;
@@ -285,7 +285,7 @@ void issue(struct CONFIG *config, struct RS *rs_ele)
 			(*rs_ele).oprd_2.state == V)
 		{//issue 조건을 검사하고 만족한다면, issue를 한다.
 
-			(*rs_ele).time_left = ((*rs_ele).opcode == MemRead) ? 3 : 1;
+			(*rs_ele).time_left = ((*rs_ele).opcode == MemRead) ? 2 : 0;
 			++issued;
 
 		}
