@@ -18,9 +18,9 @@ static int cnt_MemWrite = 0;
 struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int arr_inst_len);
 
 void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct INST *arr_inst);
-void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status, int i);
+void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, int rs_idx, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status);
 void value_payback(struct RS *rs_ele, struct ROB *rob);
-void decode_and_value_payback(struct CONFIG * config, struct ROB *rob, struct CA_status *rob_status, struct RS * rs, struct FQ * fq, struct CA_status * fq_status);
+void decode_and_value_payback(struct CONFIG * config, struct ROB *rob, struct CA_status *rob_status, struct RS * rs, bool *is_completed_this_cycle, struct FQ * fetch_queue, struct CA_status * fq_status, struct RAT * rat);
 
 void issue(struct CONFIG *config, struct RS *rs_ele);
 void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle);
@@ -63,11 +63,10 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 
 	// Reservation Station
 	struct RS* rs = calloc((*config).RS_size, sizeof(struct RS)); //struct RS rs[(*config).RS_size];
-	for (i = 0; i < (*config).RS_size; i++) { rs[i].is_valid = false; }//initialize
-
 	// is_completed_this_cycle? to prevent issue of insturction in RS which has V value promoted from Q in current cycle.
 	bool* is_completed_this_cycle = calloc((*config).RS_size, sizeof(bool));//bool is_completed_this_cycle[(*config).ROB_size];
-	
+	for (i = 0; i < (*config).RS_size; i++) { rs[i].is_valid = false; is_completed_this_cycle[i] = false;}//initialize
+
 	// ReOrdering Budder
 	struct ROB* rob = calloc((*config).ROB_size, sizeof(struct ROB));//struct ROB rob[(*config).ROB_size];
 	struct CA_status rob_status;
@@ -81,23 +80,21 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 		decoded = 0;
 		issued = 0;
 
-		// Flush is_completed_this_cycle array
-		for (i = 0; i < (*config).RS_size; i++) { is_completed_this_cycle[i] = false; }
-
-		//////////////////////////////////////////////////////////////Loop1
+		//Loop1
 		//ROB를 rob_status.occupied만큼 돌면서 commit/ (ex/issue) 실행
 
 		commit(config, rob, &rob_status, rat);
 
-		ex_and_issue(config, rob, &rob_status, rs);
+		ex_and_issue(config, rob, &rob_status, rs, is_completed_this_cycle);
 
-		
-		//////////////////////////////////////////////////////////////Loop2
-		//RS를 전부 돌면서 decode / value_feeding
-		decode_and_value_payback(config, rob, &rob_status, rs, fq);
+		//Loop2
+		//RS를 전부 돌면서 decode / value_feeding , is_completed_this_cycle array 도 초기화.
+		decode_and_value_payback(config, rob, &rob_status, rs,is_completed_this_cycle, fetch_queue,&fq_status,rat);
+
 
 		// Fetch instructions
 		fetch(config, fetch_queue, &fq_status, arr_inst);
+
 
 		// Dump
 		switch ((*config).Dump)
@@ -114,17 +111,16 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 			ROB_arr_reporter(rob, rob_status);
 			break;
 		default:
-			printf("= Cycle %-5d\n", cycle);
 			//debug mode
+			printf("= Cycle %-5d\n", cycle);
 			FQ_arr_printer(fetch_queue, fq_status);
 			RAT_arr_printer(rat, 17);
 			RS_arr_printer(rs, (*config).RS_size);
 			ROB_arr_printer(rob, rob_status);
-			getchar();
+			wait();
 			break;
 		}
 		cycle++;
-
 
 	}
 	// Simulation finished
@@ -146,6 +142,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	(*ptr_report).MemWrite = cnt_MemWrite;
 	(*ptr_report).IPC = ((double)inst_length / (double) cycle);
 
+	REPORT_reporter(ptr_report);	// display a report
 
 	return ptr_report;	
 }
@@ -170,12 +167,13 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 	// Decode only when: 1) fq is not empty. 2) Upto N instructions. 3) ROB has empty place
 	if ((*fq_status).occupied > 0 && decoded < (*config).Width && (*rob_status).occupied < (*rob_status).size)
 	{
-		// Putting first element of Fetch Queue to Reservation Station	
-		(*rs_ele).is_valid = true;
-		(*rs_ele).opcode = fetch_queue[(*fq_status).head].opcode;
+
+		struct FQ * fq_ele;
+		fq_ele = fetch_queue + ((*fq_status).head); //디코드해올 fq의 inst
+
 
 		// Count Instruction number
-		switch ((*rs_ele).opcode)
+		switch (fetch_queue->opcode)
 		{
 		case 0:
 			cnt_IntAlu++;
@@ -188,8 +186,12 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 			break;
 		}
 
-		int oprd_1 = fetch_queue[(*fq_status).head].oprd_1;
-		int oprd_2 = fetch_queue[(*fq_status).head].oprd_2;
+		// Putting first element of Fetch Queue to Reservation Station	
+		(*rs_ele).is_valid = true;
+		(*rs_ele).opcode = fq_ele->opcode;
+
+		int oprd_1 = fq_ele->oprd_1;
+		int oprd_2 = fq_ele->oprd_2;
 		if (oprd_1 == 0 || rat[oprd_1].RF_valid)
 		{
 			(*rs_ele).oprd_1.state = V;
@@ -213,8 +215,8 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 		(*rs_ele).time_left = -1; // Waiting to be issued
 
 		// Putting first element of Fetch Queue to ROB
-		rob[ca_next_pos(rob_status)].opcode = fetch_queue[(*fq_status).head].opcode;
-		rob[ca_next_pos(rob_status)].dest = fetch_queue[(*fq_status).head].dest;
+		rob[ca_next_pos(rob_status)].opcode = fq_ele->opcode;
+		rob[ca_next_pos(rob_status)].dest = fq_ele->dest;
 		rob[ca_next_pos(rob_status)].rs_dest = rs_idx;
 		rob[ca_next_pos(rob_status)].status = P;
 		(*rs_ele).rob_dest = ca_next_pos(rob_status);
@@ -235,7 +237,7 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 
 void value_payback(struct RS *rs_ele, struct ROB *rob)
 {
-	if (rs_ele->time_left<0)
+	if (rs_ele->time_left<0)//if it isn't issued
 	{
 		// Q ->V Promotion
 		if ((*rs_ele).oprd_1.state == Q && rob[((*rs_ele).oprd_1.data.q)].status)
@@ -250,21 +252,26 @@ void value_payback(struct RS *rs_ele, struct ROB *rob)
 	}
 }
 
-void decode_and_value_payback(struct CONFIG * config, struct ROB *rob, struct CA_status *rob_status, struct RS * rs, struct FQ * fq, struct CA_status * fq_status)
+void decode_and_value_payback(struct CONFIG * config, struct ROB *rob, struct CA_status *rob_status, struct RS * rs, bool *is_completed_this_cycle, struct FQ * fetch_queue, struct CA_status * fq_status, struct RAT * rat)
 {
-
 	// For every entries in Reservation Station,
-	for (i = 0; i < (*config).RS_size; i++)
+	for (int i = 0; i < (*config).RS_size; i++)
 	{
 		if (rs[i].is_valid) // Instruction is inside this entry of RS
 		{
-
+			value_payback(rs + i, rob);//check args is ready.
 		}
-		else                  // This entry of RS is empty now
+		else// This entry of RS is empty now
 		{
-			// Try to decode instruction into empty place
-			decode(config, fetch_queue, &fq_status, &rs[i], rat, rob, &rob_status);
+			if (false==is_completed_this_cycle[i])//if not this entry flushed this cycle,
+			{
+				decode(config, fetch_queue, fq_status, rs+i, i, rat, rob, rob_status);// Try to decode instruction into empty place
+			}
 		}
+
+		// Flush is_completed_this_cycle array
+		is_completed_this_cycle[i] = false;
+
 	}
 
 }
@@ -338,6 +345,8 @@ void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_
 
 void wait(void)
 {
+	printf("\nPress any key to continue :\n");
+	getchar();
 }
 
 void rs_retire(struct RS *rs_ele, struct ROB *rob_ele)

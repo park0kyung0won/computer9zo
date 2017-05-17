@@ -29,13 +29,14 @@ void ROB_printer(const struct ROB* printed);
 
 void FQ_arr_printer(const struct FQ* fq, struct CA_status fq_status);
 void RAT_arr_printer(const struct RAT* rat, int rat_size);
-void RS_arr_printer(struct RS *rs, int rs_size);
+void RS_arr_printer(const struct RS *rs, int rs_size);
 void ROB_arr_printer(const struct ROB *rob, struct CA_status rob_status);
 
 //for reporting
 void RS_reporter(const struct RS* printed);
 void ROB_reporter(const struct ROB* printed);
-void RS_arr_reporter(struct RS *rs, int rs_size);
+void REPORT_reporter(const struct REPORT* printed);
+void RS_arr_reporter(const struct RS *rs, int rs_size);
 void ROB_arr_reporter(const struct ROB *rob, struct CA_status rob_status);
 
 void REPORT_fprinter(const struct REPORT* printed, FILE* fileID);

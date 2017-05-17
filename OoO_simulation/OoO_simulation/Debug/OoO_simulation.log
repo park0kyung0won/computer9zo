@@ -1,17 +1,13 @@
 ﻿  simulator.c
+  main.c
+  file_read.c
   data_structures.c
-f:\deposit\local git\computer9zo\data_structures.c(78): warning C4090: '=': different 'const' qualifiers
-f:\deposit\local git\computer9zo\data_structures.c(86): warning C4474: 'printf' : too many arguments passed for format string
-  f:\deposit\local git\computer9zo\data_structures.c(86): note: placeholders and their parameters expect 0 variadic arguments, but 1 were provided
-f:\deposit\local git\computer9zo\data_structures.c(106): warning C4090: '=': different 'const' qualifiers
-f:\deposit\local git\computer9zo\data_structures.c(110): warning C4474: 'printf' : too many arguments passed for format string
-  f:\deposit\local git\computer9zo\data_structures.c(110): note: placeholders and their parameters expect 0 variadic arguments, but 1 were provided
-f:\deposit\local git\computer9zo\data_structures.c(133): warning C4474: 'printf' : too many arguments passed for format string
-  f:\deposit\local git\computer9zo\data_structures.c(133): note: placeholders and their parameters expect 0 variadic arguments, but 1 were provided
-f:\deposit\local git\computer9zo\data_structures.c(153): warning C4090: '=': different 'const' qualifiers
-f:\deposit\local git\computer9zo\data_structures.c(156): warning C4477: 'printf' : format string '%-4d' requires an argument of type 'int', but variadic argument 1 has type 'ROB *'
-f:\deposit\local git\computer9zo\data_structures.c(158): warning C4474: 'printf' : too many arguments passed for format string
-  f:\deposit\local git\computer9zo\data_structures.c(158): note: placeholders and their parameters expect 0 variadic arguments, but 1 were provided
-  Generating Code...
-  OoO_simulation.vcxproj -> F:\Deposit\Local Git\computer9zo\OoO_simulation\Debug\OoO_simulation.exe
-  OoO_simulation.vcxproj -> F:\Deposit\Local Git\computer9zo\OoO_simulation\Debug\OoO_simulation.pdb (Partial PDB)
+d:\deposit\github\computer9zo\data_structures.c(81): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
+d:\deposit\github\computer9zo\data_structures.c(104): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
+d:\deposit\github\computer9zo\data_structures.c(123): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
+d:\deposit\github\computer9zo\data_structures.c(145): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
+d:\deposit\github\computer9zo\data_structures.c(192): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
+d:\deposit\github\computer9zo\data_structures.c(208): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
+  코드를 생성하고 있습니다...
+  OoO_simulation.vcxproj -> D:\Deposit\github\computer9zo\OoO_simulation\Debug\OoO_simulation.exe
+  OoO_simulation.vcxproj -> D:\Deposit\github\computer9zo\OoO_simulation\Debug\OoO_simulation.pdb (Partial PDB)

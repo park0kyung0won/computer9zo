@@ -59,11 +59,11 @@ void ROB_printer(const struct ROB* printed)
 	{
 		printf("%-10s", instruction_name[printed->opcode]);
 		printf("R%-5d ", printed->dest);
-		printf("%c  ", (printed->status==C)?'C':'P');
+		printf("%c   ", (printed->status==C)?'C':'P');
 		printf("RS%-4d", printed->dest);
 	}
 	else
-		printf("                          ");
+		printf("                           ");
 }
 
 void FQ_arr_printer(const struct FQ* fq, struct CA_status fq_status)
@@ -111,7 +111,7 @@ void RAT_arr_printer(const struct RAT* rat, int rat_size)
 	if (idx % DUMP_WIDTH != 0) { printf("\n"); }//DUMP_WIDTH 배수가 아닌 경우. 구분을 위해 줄바꿈을 한번 해준다.
 }
 
-void RS_arr_printer(struct RS *rs, int rs_size)
+void RS_arr_printer(const struct RS *rs, int rs_size)
 {
 	printf("Reservation station\n");
 
@@ -174,7 +174,16 @@ void ROB_reporter(const struct ROB* printed)
 	else
 		printf("P");
 }
-void RS_arr_reporter(struct RS *rs, int rs_size)
+void REPORT_reporter(const struct REPORT* printed)
+{
+	printf("%15s%d\n", "Cycles", printed->Cycles);
+	printf("%15s%f\n", "IPC", printed->IPC);
+	printf("%15s%d\n", "Total Insts", printed->Total_Insts);
+	printf("%15s%d\n", "IntAlu", printed->IntAlu);
+	printf("%15s%d\n", "MemRead", printed->MemRead);
+	printf("%15s%d\n", "MemWrite", printed->MemWrite);
+}
+void RS_arr_reporter(const struct RS *rs, int rs_size)
 {
 	struct RS *rs_idx = NULL;
 	int idx;
