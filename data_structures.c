@@ -60,10 +60,10 @@ void ROB_printer(const struct ROB* printed)
 		printf("%-10s", instruction_name[printed->opcode]);
 		printf("R%-5d ", printed->dest);
 		printf("%c   ", (printed->status==C)?'C':'P');
-		printf("RS%-4d", printed->dest);
+		printf("RS%-4d", printed->rs_dest);
 	}
 	else
-		printf("                           ");
+		printf("                            ");
 }
 
 void FQ_arr_printer(const struct FQ* fq, struct CA_status fq_status)
