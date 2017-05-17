@@ -32,7 +32,7 @@ void RAT_printer(const struct RAT* printed)
 	if (printed->RF_valid)
 		printf("    -");
 	else
-		printf("%5d", printed->Q);
+		printf("%5d", printed->Q+1);
 }
 
 void RS_printer(const struct RS* printed)
@@ -55,15 +55,10 @@ void RS_printer(const struct RS* printed)
 
 void ROB_printer(const struct ROB* printed)
 {
-	if (printed->dest > 0)
-	{
-		printf("%-10s", instruction_name[printed->opcode]);
-		printf("R%-5d ", printed->dest);
-		printf("%c   ", (printed->status==C)?'C':'P');
-		printf("RS%-4d", printed->rs_dest+1);
-	}
-	else
-		printf("                            ");
+	printf("%-10s", instruction_name[printed->opcode]);
+	printf("R%-5d ", printed->dest);
+	printf("%c   ", (printed->status==C)?'C':'P');
+	printf("RS%-4d", printed->rs_dest+1);
 }
 
 void FQ_arr_printer(const struct FQ* fq, struct CA_status fq_status)
@@ -147,7 +142,7 @@ void ROB_arr_printer(const struct ROB *rob, struct CA_status rob_status)
 		}
 		else
 		{//실제 원소 개수 이상의 공간은 쓰레기값이므로 공백을 출력한다.
-			printf("                          ");
+			printf("                           ");
 		}
 
 		if (idx % DUMP_WIDTH == DUMP_WIDTH - 1) { printf("|\n"); }//줄바꿈을 위한 구문
@@ -169,10 +164,7 @@ void RS_reporter(const struct RS* printed)
 }
 void ROB_reporter(const struct ROB* printed)
 {
-	if (printed->dest > 0)
-		printf("%c", (printed->status==C)?'C':'P');
-	else
-		printf("P");
+	printf("%c", (printed->status==C)?'C':'P');
 }
 void REPORT_reporter(const struct REPORT* printed)
 {
