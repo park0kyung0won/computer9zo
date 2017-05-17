@@ -1,20 +1,17 @@
-simulator: main.o simul.o fileread.o datatypes.o cycleindex.o
-	gcc -o simulator main.o simul.o fileread.o datatypes.o cycleindex.o
+simulator: main.o simulator.o file_read.o data_structures.o 
+	gcc -std=c99 -o simulator main.o simulator.o file_read.o data_structures.o
 
 main.o: main.c
-	gcc -c -v main.c
+	gcc -c -v -std=c99 main.c
 
-simul.o: simul.c
-	gcc -c -v simul.c
+simulator.o: simulator.c
+	gcc -c -v -std=c99 simulator.c
 
-fileread.o: fileread.c
-	gcc -c -v fileread.c
+file_read.o: file_read.c
+	gcc -c -v -std=c99 file_read.c
 
-datatypes.o: datatypes.c
-	gcc -c -v datatypes.c
-
-cycleindex.o: cycleindex.c
-	gcc -c -v cycleindex.c
+data_structures.o: data_structures.c
+	gcc -c -v -std=c99 data_structures.c
 
 all: simulator
 

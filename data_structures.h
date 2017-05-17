@@ -3,8 +3,9 @@
 #define DATA_TYPES
 
 #include <stdbool.h>
+#include <stdio.h>
 
-enum oprd_state { Q = 0, V = 1 }; // has V? or Q?
+enum flag { Q = 0, V = 1 }; // has V? or Q?
 enum instruction { IntAlu = 0, MemRead = 1, MemWrite = 2 }; // Instruction Type
 enum is_complete { P = 0, C = 1 }; // P means pending, C means completed
 const char* instruction_name[3];
