@@ -1,9 +1,9 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "data_structures.h"
 
-//ÆÄÀÏ ³» ±Û·Î¹ú·Î ¼±¾ğ
+//íŒŒì¼ ë‚´ ê¸€ë¡œë²Œë¡œ ì„ ì–¸
 static int inst_length;
 static int pc = 0;
 static int cycle = 1;
@@ -32,7 +32,7 @@ void commit(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status
 
 struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int arr_inst_len)
 {
-	//ÆÄÀÏ ³» ±Û·Î¹ú ÃÊ±âÈ­
+	//íŒŒì¼ ë‚´ ê¸€ë¡œë²Œ ì´ˆê¸°í™”
 	pc = 0;
 	cycle = 1;
 	inst_length = arr_inst_len;
@@ -74,7 +74,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	
 	while (pc < inst_length)
 	{	
-		//°¢ ¸í·ÉÀÇ ½ÇÇà È½¼ö¸¦ ÃÊ±âÈ­ÇÑ´Ù.
+		//ê° ëª…ë ¹ì˜ ì‹¤í–‰ íšŸìˆ˜ë¥¼ ì´ˆê¸°í™”í•œë‹¤.
 		decoded = 0;
 		issued = 0;
 
@@ -82,7 +82,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 		for (i = 0; i < (*config).RS_size; i++) { is_completed_this_cycle[i] = false; }
 
 		//////////////////////////////////////////////////////////////Loop1
-		//ROB¸¦ rob_status.occupied¸¸Å­ µ¹¸é¼­ commit/ (ex/issue) ½ÇÇà
+		//ROBë¥¼ rob_status.occupiedë§Œí¼ ëŒë©´ì„œ commit/ (ex/issue) ì‹¤í–‰
 
 		commit(config, rob, &rob_status, rat);
 
@@ -275,10 +275,10 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 void issue(struct CONFIG *config, struct RS *rs_ele)
 {
 	if (issued < (*config).Width)
-	{//¾ÆÁ÷ width¸¸Å­ issue°¡ µÇÁö ¾Ê¾Ò´Ù¸é
+	{//ì•„ì§ widthë§Œí¼ issueê°€ ë˜ì§€ ì•Šì•˜ë‹¤ë©´
 		if ((*rs_ele).oprd_1.state == V &&
 			(*rs_ele).oprd_2.state == V)
-		{//issue Á¶°ÇÀ» °Ë»çÇÏ°í ¸¸Á·ÇÑ´Ù¸é, issue¸¦ ÇÑ´Ù.
+		{//issue ì¡°ê±´ì„ ê²€ì‚¬í•˜ê³  ë§Œì¡±í•œë‹¤ë©´, issueë¥¼ í•œë‹¤.
 
 			(*rs_ele).time_left = ((*rs_ele).opcode == MemRead) ? 3 : 1;
 			++issued;
@@ -311,18 +311,18 @@ issued++;
 void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle)
 {
 	//if ( executed < (*config).Width)
-	//ÀÌ¹Ì ÀÌ½´°¡ ÃÖ´ë N°³±îÁö °¡´ÉÇÏ±â ¶§¹®¿¡, exµµ ÃÖ´ë N°³±îÁö¸¸ ¼öÇàµÈ´Ù. °Ë»çÇÊ¿ä ¾øÀ½
+	//ì´ë¯¸ ì´ìŠˆê°€ ìµœëŒ€ Nê°œê¹Œì§€ ê°€ëŠ¥í•˜ê¸° ë•Œë¬¸ì—, exë„ ìµœëŒ€ Nê°œê¹Œì§€ë§Œ ìˆ˜í–‰ëœë‹¤. ê²€ì‚¬í•„ìš” ì—†ìŒ
 
 	if (rs_ele->time_left == 0)
-	{//¸¸¾à ½ÇÇà ´ë±âÁßÀÌ¶ó¸é, ½ÇÇàÇÏ°í RS¸¦ ºñ¿î ´ÙÀ½ ROB¸¦ C »óÅÂ·Î ¹Ù²Û´Ù.
+	{//ë§Œì•½ ì‹¤í–‰ ëŒ€ê¸°ì¤‘ì´ë¼ë©´, ì‹¤í–‰í•˜ê³  RSë¥¼ ë¹„ìš´ ë‹¤ìŒ ROBë¥¼ C ìƒíƒœë¡œ ë°”ê¾¼ë‹¤.
 		
 		(rs_ele->is_valid) = false;
 		(*is_completed_this_cycle) = true;
 		(rob_ele->status) = C;
 	}
 	else
-	{//¸¸¾à issue°¡ µÇ¾îÀÖ´Ù¸é,
-		--(rs_ele->time_left);//ALU¿¡ ³Ö´Â´Ù ( ½ÇÇà ´ë±â ´Ü°è ).
+	{//ë§Œì•½ issueê°€ ë˜ì–´ìˆë‹¤ë©´,
+		--(rs_ele->time_left);//ALUì— ë„£ëŠ”ë‹¤ ( ì‹¤í–‰ ëŒ€ê¸° ë‹¨ê³„ ).
 	}
 
 }
@@ -333,23 +333,23 @@ void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_
 	struct ROB * rob_ele;
 	struct RS  * rs_ele;
 	for (i = 0; i < (rob_status->occupied); ++i)
-	{//¸ğµç ¿ø¼Ò¿¡ ´ëÇØ, °Ë»çÇÑ´Ù
+	{//ëª¨ë“  ì›ì†Œì— ëŒ€í•´, ê²€ì‚¬í•œë‹¤
 
 		rob_ele = rob + ((rob_status->head + i) % rob_status->size);
 		if (rob_ele->status == P)
-		{//¸¸¾à »óÅÂ°¡ P¶ó¸é, ÀÌ´Â issueÀÇ ´ë»ó°ú exÀÇ ´ë»óÀ» Æ÷ÇÔÇÑ´Ù.
+		{//ë§Œì•½ ìƒíƒœê°€ Pë¼ë©´, ì´ëŠ” issueì˜ ëŒ€ìƒê³¼ exì˜ ëŒ€ìƒì„ í¬í•¨í•œë‹¤.
 			
 			rs_ele = (rs + (rob_ele->rs_dest));
 
 			if (rs_ele->time_left >= 0)
-			{//¸¸¾à Issue µÇ¾ú´Ù¸é
+			{//ë§Œì•½ Issue ë˜ì—ˆë‹¤ë©´
 				execute(rs + (rob_ele->rs_dest), rob_ele, is_completed_this_cycle + (rob_ele->rs_dest));
-				//½ÇÇà ¹× ½ÇÇà ¿Ï·áÇÑ´Ù.
+				//ì‹¤í–‰ ë° ì‹¤í–‰ ì™„ë£Œí•œë‹¤.
 			}
 			else
-			{//¸¸¾à Issue ¾ÈµÇ¾ú´Ù¸é
+			{//ë§Œì•½ Issue ì•ˆë˜ì—ˆë‹¤ë©´
 				issue(config, rs_ele);
-				//ÀÌ½´ Á¶°ÇÀ» °Ë»çÇÏ°í ºÎÇÕÇÒ °æ¿ì ÀÌ½´ÇÑ´Ù.
+				//ì´ìŠˆ ì¡°ê±´ì„ ê²€ì‚¬í•˜ê³  ë¶€í•©í•  ê²½ìš° ì´ìŠˆí•œë‹¤.
 			}
 
 		}
@@ -376,9 +376,9 @@ void commit(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status
 	// Only permits upto N commits
 	num_of_search = (*config).Width > (*rob_status).occupied ? (*rob_status).occupied : (*config).Width;
 
-	//ÇöÀç ROBÀÇ ¿ø¼Ò °³¼ö¿Í Width Áß ÀÛÀº ¼ıÀÚ±îÁö¸¸ È®ÀÎÇÏ¸é µÊ.
-	//¿Ö³Ä¸é ÃÖ´ë Ä¿¹ÔÀº ¿¬¼ÓÀûÀ¸·Î CÀÎ °æ¿ì¿¡¸¸ Width±îÁö °¡´ÉÇÏ°í(ÃÖ´ëÇÑ ÁÙ¿©µµ Head - Width »çÀÌ)
-	//¿ø¼Ò °³¼ö°¡ Widthº¸´Ù ÀÛ´Ù¸é, ÃÖ´ë Ä¿¹ÔÀº ¿ø¼Ò °³¼ö±îÁö¸¸ °¡´ÉÇÏ±â ¶§¹®.
+	//í˜„ì¬ ROBì˜ ì›ì†Œ ê°œìˆ˜ì™€ Width ì¤‘ ì‘ì€ ìˆ«ìê¹Œì§€ë§Œ í™•ì¸í•˜ë©´ ë¨.
+	//ì™œëƒë©´ ìµœëŒ€ ì»¤ë°‹ì€ ì—°ì†ì ìœ¼ë¡œ Cì¸ ê²½ìš°ì—ë§Œ Widthê¹Œì§€ ê°€ëŠ¥í•˜ê³ (ìµœëŒ€í•œ ì¤„ì—¬ë„ Head - Width ì‚¬ì´)
+	//ì›ì†Œ ê°œìˆ˜ê°€ Widthë³´ë‹¤ ì‘ë‹¤ë©´, ìµœëŒ€ ì»¤ë°‹ì€ ì›ì†Œ ê°œìˆ˜ê¹Œì§€ë§Œ ê°€ëŠ¥í•˜ê¸° ë•Œë¬¸.
 
 	for (i = 0; i < num_of_search; i++)
 	{
