@@ -19,13 +19,16 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 
 void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct INST *arr_inst);
 void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status, int i);
+void value_payback(struct RS *rs_ele, struct ROB *rob);
+void decode_and_value_payback(struct CONFIG * config, struct ROB *rob, struct CA_status *rob_status, struct RS * rs, struct FQ * fq, struct CA_status * fq_status);
 
 void issue(struct CONFIG *config, struct RS *rs_ele);
 void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle);
+void rs_retire(struct RS *rs_ele, struct ROB *rob_ele);
 void ex_and_issue(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status, struct RS *rs, bool *is_completed_this_cycle);
 
 void wait(void);
-void rs_retire(struct RS *rs_ele, struct ROB *rob);
+
 void commit(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status, struct RAT *rat);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,57 +92,9 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 		ex_and_issue(config, rob, &rob_status, rs);
 
 		
-		//////////////////////////////////////////////////////////////
-
-		// Issue older instructions first
-		for (i = 0; i < issueWaiting && i < (*config).Width; i++)
-		{
-			// Find oldest among them
-			struct RS *oldest = &issuewait_list[0];
-			int oldest_reference = issuewait_reference[0];
-			for (int j = 1; j < issueWaiting; j++)
-			{
-				if ( issuewait_list[j].time_decoded < (*oldest).time_decoded )
-				{
-					oldest = &issuewait_list[j];
-					oldest_reference = issuewait_reference[j];
-				}
-			}
-
-			// Issue oldest one
-			issue(config, &rs[oldest_reference], issuewait_list, rob, is_completed_this_cycle, issuewait_reference, -1);
-			is_issued_this_cycle[oldest_reference] = true;
-			issued++;
-		}
-		issueWaiting = 0;
-		
-		// Commit ROB -> RAT
-		commit(config, rob, &rob_status, rat);
-		
-		// For every entries in Reservation Station,
-		for (i = 0; i < (*config).RS_size; i++)
-		{
-			if ( rs[i].is_valid ) // Instruction is inside this entry of RS
-			{
-				switch ( rs[i].time_left)
-				{
-					case 0:
-						rs_retire(&rs[i], rob);
-						break;
-					case -1:
-						issue(config, &rs[i], issuewait_list, rob, is_completed_this_cycle, issuewait_reference, i);
-						break;
-					default:
-						execute(config, &rs[i], is_issued_this_cycle, i);
-						break;
-				}	
-			}
-			else                  // This entry of RS is empty now
-			{
-				// Try to decode instruction into empty place
-				decode(config, fetch_queue, &fq_status, &rs[i], rat, rob, &rob_status);
-			}	
-		}
+		//////////////////////////////////////////////////////////////Loop2
+		//RS를 전부 돌면서 decode / value_feeding
+		decode_and_value_payback(config, rob, &rob_status, rs, fq);
 
 		// Fetch instructions
 		fetch(config, fetch_queue, &fq_status, arr_inst);
@@ -147,28 +102,30 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 		// Dump
 		switch ((*config).Dump)
 		{
-			case 0:
-				break;
-			case 1:
-				printf("= Cycle %-5d\n", cycle);
-				ROB_arr_reporter(rob, rob_status);
-				break;
-			case 2:
-				printf("= Cycle %-5d\n", cycle);
-				RS_arr_reporter(rs, (*config).RS_size);
-				ROB_arr_reporter(rob, rob_status);
-				break;
-			default:
-				printf("= Cycle %-5d\n", cycle);
-				//debug mode
-				FQ_arr_printer(fetch_queue, fq_status);
-				RAT_arr_printer(rat, 17);
-				RS_arr_printer(rs, (*config).RS_size);
-				ROB_arr_printer(rob, rob_status);
-				getchar();
-				break;
+		case 0:
+			break;
+		case 1:
+			printf("= Cycle %-5d\n", cycle);
+			ROB_arr_reporter(rob, rob_status);
+			break;
+		case 2:
+			printf("= Cycle %-5d\n", cycle);
+			RS_arr_reporter(rs, (*config).RS_size);
+			ROB_arr_reporter(rob, rob_status);
+			break;
+		default:
+			printf("= Cycle %-5d\n", cycle);
+			//debug mode
+			FQ_arr_printer(fetch_queue, fq_status);
+			RAT_arr_printer(rat, 17);
+			RS_arr_printer(rs, (*config).RS_size);
+			ROB_arr_printer(rob, rob_status);
+			getchar();
+			break;
 		}
 		cycle++;
+
+
 	}
 	// Simulation finished
 	
@@ -208,7 +165,7 @@ void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_s
 	}
 }
 
-void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status, int i)
+void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, int rs_idx, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status)
 {
 	// Decode only when: 1) fq is not empty. 2) Upto N instructions. 3) ROB has empty place
 	if ((*fq_status).occupied > 0 && decoded < (*config).Width && (*rob_status).occupied < (*rob_status).size)
@@ -240,7 +197,7 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 		else
 		{
 			(*rs_ele).oprd_1.state = Q;
-			(*rs_ele).oprd_1.data.q = rat[fetch_queue[(*fq_status).head].oprd_1].Q;
+			(*rs_ele).oprd_1.data.q = rat[oprd_1].Q;
 		}
 
 		if (oprd_2 == 0 || rat[oprd_2].RF_valid)
@@ -250,7 +207,7 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 		else
 		{
 			(*rs_ele).oprd_2.state = Q;
-			(*rs_ele).oprd_2.data.q = rat[fetch_queue[(*fq_status).head].oprd_2].Q;
+			(*rs_ele).oprd_2.data.q = rat[oprd_2].Q;
 		}
 
 		(*rs_ele).time_left = -1; // Waiting to be issued
@@ -258,7 +215,7 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 		// Putting first element of Fetch Queue to ROB
 		rob[ca_next_pos(rob_status)].opcode = fetch_queue[(*fq_status).head].opcode;
 		rob[ca_next_pos(rob_status)].dest = fetch_queue[(*fq_status).head].dest;
-		rob[ca_next_pos(rob_status)].rs_dest = i;
+		rob[ca_next_pos(rob_status)].rs_dest = rs_idx;
 		rob[ca_next_pos(rob_status)].status = P;
 		(*rs_ele).rob_dest = ca_next_pos(rob_status);
 
@@ -271,9 +228,47 @@ void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_
 
 		ca_cnt_push(rob_status); // Element has been pushed to ROB
 		ca_cnt_pop(fq_status);   // Element has been poped from Fetch Queue
+
 		decoded++;
 	}
 }
+
+void value_payback(struct RS *rs_ele, struct ROB *rob)
+{
+	if (rs_ele->time_left<0)
+	{
+		// Q ->V Promotion
+		if ((*rs_ele).oprd_1.state == Q && rob[((*rs_ele).oprd_1.data.q)].status)
+		{
+			(*rs_ele).oprd_1.state = V;
+		}
+
+		if ((*rs_ele).oprd_2.state == Q && rob[((*rs_ele).oprd_2.data.q)].status)
+		{
+			(*rs_ele).oprd_2.state = V;
+		}
+	}
+}
+
+void decode_and_value_payback(struct CONFIG * config, struct ROB *rob, struct CA_status *rob_status, struct RS * rs, struct FQ * fq, struct CA_status * fq_status)
+{
+
+	// For every entries in Reservation Station,
+	for (i = 0; i < (*config).RS_size; i++)
+	{
+		if (rs[i].is_valid) // Instruction is inside this entry of RS
+		{
+
+		}
+		else                  // This entry of RS is empty now
+		{
+			// Try to decode instruction into empty place
+			decode(config, fetch_queue, &fq_status, &rs[i], rat, rob, &rob_status);
+		}
+	}
+
+}
+
 
 void issue(struct CONFIG *config, struct RS *rs_ele)
 {
@@ -290,27 +285,7 @@ void issue(struct CONFIG *config, struct RS *rs_ele)
 			
 	}
 }
-/*
-if (issued < (*config).Width)
-{
-// Q ->V Promotion
-if ((*rs_ele).oprd_1.state == Q && rob[((*rs_ele).oprd_1.data.q)].status)
-{
-(*rs_ele).oprd_1.state = V;
-}
 
-if ((*rs_ele).oprd_2.state == Q && rob[((*rs_ele).oprd_2.data.q)].status)
-{
-(*rs_ele).oprd_2.state = V;
-}
-
-// Issue
-if ((*rs_ele).oprd_1.state && (*rs_ele).oprd_2.state && !is_completed_this_cycle[(*rs_ele).rob_dest])
-{
-(*rs_ele).time_left = ((*rs_ele).opcode == MemRead) ? 3 : 1;
-}
-issued++;
-}*/
 void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cycle)
 {
 	//if ( executed < (*config).Width)
@@ -319,9 +294,9 @@ void execute(struct RS *rs_ele, struct ROB* rob_ele, bool *is_completed_this_cyc
 	if (rs_ele->time_left == 0)
 	{//만약 실행 대기중이라면, 실행하고 RS를 비운 다음 ROB를 C 상태로 바꾼다.
 		
-		(rs_ele->is_valid) = false;
+		rs_retire(rs_ele, rob_ele);
 		(*is_completed_this_cycle) = true;
-		(rob_ele->status) = C;
+
 	}
 	else
 	{//만약 issue가 되어있다면,
@@ -365,9 +340,9 @@ void wait(void)
 {
 }
 
-void rs_retire(struct RS *rs_ele, struct ROB *rob)
+void rs_retire(struct RS *rs_ele, struct ROB *rob_ele)
 {
-	rob[(*rs_ele).rob_dest].status = C;
+	rob_ele->status = C;
 	(*rs_ele).is_valid = false;
 }
 
@@ -396,17 +371,4 @@ void commit(struct CONFIG *config, struct ROB *rob, struct CA_status *rob_status
 			break;
 		}
 	}
-
-<<<<<<< HEAD
-	// Only permits upto N commits
-	num_of_retire = (*config).Width > num_of_retire ? num_of_retire : (*config).Width;
-
-	for (i = 0; i < num_of_retire; i++)
-	{
-		rat[rob[i].dest].RF_valid = true;
-		ca_cnt_pop(rob_status);
-	}
 }
-=======
-}
->>>>>>> 3fb47b123c924cb78fa280403371281a24bb2d22
