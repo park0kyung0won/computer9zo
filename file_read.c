@@ -138,12 +138,12 @@ bool char_to_INST(char* buffer, struct INST * out_inst)
 
 bool config_reader(char* filename, struct CONFIG *out_config)
 {
-	char buffer[5];
+	char buffer[30];
 	FILE *configp;
 	if ((configp = fopen(filename, "r")) == NULL) { return false; }//if configp == null, it mean fail.
 	for (int idx = 0; idx < 4; ++idx)
 	{
-		fgets(buffer, 5, configp);
+		fgets(buffer, 30, configp);
 		switch (idx)
 		{
 		case 0: out_config->Dump = atoi(buffer); break;
