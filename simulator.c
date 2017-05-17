@@ -56,6 +56,7 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 
 	// RAT
 	struct RAT rat[17]; // 0 means no. rat[1] ~ rat[16] are Arch Register entries
+	for (i = 0; i < 17; i++) { rat[i].Q = 0; rat[i].RF_valid = true; }//initialize
 
 	// Fetch Queue
 	struct FQ* fetch_queue = calloc(2 * (*config).Width, sizeof(struct FQ) );//struct FQ fetch_queue[2 * (*config).Width]
@@ -77,6 +78,12 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	rob_status.head = 0;
 	rob_status.occupied = 0;
 	
+	//check all is accesable
+	if (fetch_queue==NULL|| rs==NULL || rob==NULL|| is_completed_this_cycle==NULL)
+	{//error
+		return NULL;
+	}
+
 	do
 	{	
 		//cycle pluse
@@ -109,9 +116,13 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 		{
 		case 0:
 			//지겨움 방지
-			if (pc % (inst_length / 100) == 0)
-			//if (cycle> 250000)
+			//if (pc % (inst_length / 100) == 0)
+			if (cycle % 1000 == 1)
 			{
+				if (cycle == 1)
+				{
+					printf("Simulating =");
+				}
 				printf("%3d%%\b\b\b\b", pc*100 / inst_length);
 			}
 			break;
@@ -158,8 +169,11 @@ struct REPORT *core_simulator(struct CONFIG *config, struct INST *arr_inst, int 
 	(*ptr_report).MemWrite = cnt_MemWrite;
 	(*ptr_report).IPC = ((double)inst_length / (double) cycle);
 
-	REPORT_reporter(ptr_report);	// display a report
 
+	if (config->Dump == 0) {printf("100%%");}
+	printf("\n= Final State\n");
+	REPORT_reporter(ptr_report);	// display a report
+	printf("\n");
 	return ptr_report;	
 }
 
@@ -181,7 +195,7 @@ void fetch(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_s
 void decode(struct CONFIG *config, struct FQ *fetch_queue, struct CA_status *fq_status, struct RS *rs_ele, int rs_idx, struct RAT *rat, struct ROB *rob, struct CA_status *rob_status)
 {
 	// Decode only when: 1) fq is not empty. 2) Upto N instructions. 3) ROB has empty place
-	if ((*fq_status).occupied > 0 && decoded < (*config).Width && (*rob_status).occupied < (*rob_status).size)
+	if ((*fq_status).occupied > 0 && decoded < (*config).Width && decoded < ROB_blank)
 	{
 
 		struct FQ * fq_ele;

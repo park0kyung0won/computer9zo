@@ -168,12 +168,12 @@ void ROB_reporter(const struct ROB* printed)
 }
 void REPORT_reporter(const struct REPORT* printed)
 {
-	printf("%15s%d\n", "Cycles", printed->Cycles);
-	printf("%15s%f\n", "IPC", printed->IPC);
-	printf("%15s%d\n", "Total Insts", printed->Total_Insts);
-	printf("%15s%d\n", "IntAlu", printed->IntAlu);
-	printf("%15s%d\n", "MemRead", printed->MemRead);
-	printf("%15s%d\n", "MemWrite", printed->MemWrite);
+	printf("%-15s%d\n", "Cycles", printed->Cycles);
+	printf("%-15s%f\n", "IPC", printed->IPC);
+	printf("%-15s%d\n", "Total Insts", printed->Total_Insts);
+	printf("%-15s%d\n", "IntAlu", printed->IntAlu);
+	printf("%-15s%d\n", "MemRead", printed->MemRead);
+	printf("%-15s%d\n", "MemWrite", printed->MemWrite);
 }
 void RS_arr_reporter(const struct RS *rs, int rs_size, struct CA_status * rob_status)
 {
@@ -211,12 +211,12 @@ void ROB_arr_reporter(const struct ROB *rob, struct CA_status rob_status)
 
 void REPORT_fprinter(const struct REPORT* printed, FILE* fileID)
 {
-	fprintf(fileID, "%15s%d\n", "Cycles", printed->Cycles);
-	fprintf(fileID, "%15s%f\n", "IPC", printed->IPC);
-	fprintf(fileID, "%15s%d\n", "Total Insts", printed->Total_Insts);
-	fprintf(fileID, "%15s%d\n", "IntAlu", printed->IntAlu);
-	fprintf(fileID, "%15s%d\n", "MemRead", printed->MemRead);
-	fprintf(fileID, "%15s%d\n", "MemWrite", printed->MemWrite);
+	fprintf(fileID, "%-15s%d\n", "Cycles", printed->Cycles);
+	fprintf(fileID, "%-15s%f\n", "IPC", printed->IPC);
+	fprintf(fileID, "%-15s%d\n", "Total Insts", printed->Total_Insts);
+	fprintf(fileID, "%-15s%d\n", "IntAlu", printed->IntAlu);
+	fprintf(fileID, "%-15s%d\n", "MemRead", printed->MemRead);
+	fprintf(fileID, "%-15s%d\n", "MemWrite", printed->MemWrite);
 }
 
 

@@ -99,9 +99,15 @@ int main(int argc, char* argv[])
 			//보고서 출력
 			char out_filename[256];
 			sprintf(out_filename, "%d_%d_%d_%d_%s_report.out",
-				configs[conf_idx].Dump, configs[conf_idx].Width, configs[conf_idx].ROB_size, configs[conf_idx].RS_size, inst_filename[inst_idx]);
+					configs[conf_idx].Dump, configs[conf_idx].Width, configs[conf_idx].ROB_size, configs[conf_idx].RS_size, inst_filename[inst_idx]);
 			FILE* f_report = fopen(out_filename, "w");
 			
+			if (f_report == NULL)
+			{
+				printf("Error : Lack of memory\n");
+				disp_error();
+				return 1;
+			}
 			REPORT_fprinter(report, f_report);
 
 			fclose(f_report);			
