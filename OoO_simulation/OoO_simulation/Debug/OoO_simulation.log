@@ -1,13 +1,9 @@
-﻿  simulator.c
-  main.c
-  file_read.c
-  data_structures.c
+﻿  data_structures.c
 d:\deposit\github\computer9zo\data_structures.c(81): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
 d:\deposit\github\computer9zo\data_structures.c(104): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
 d:\deposit\github\computer9zo\data_structures.c(123): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
 d:\deposit\github\computer9zo\data_structures.c(145): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
 d:\deposit\github\computer9zo\data_structures.c(192): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
 d:\deposit\github\computer9zo\data_structures.c(208): warning C4090: '=': 'const' 한정자가 서로 다릅니다.
-  코드를 생성하고 있습니다...
   OoO_simulation.vcxproj -> D:\Deposit\github\computer9zo\OoO_simulation\Debug\OoO_simulation.exe
   OoO_simulation.vcxproj -> D:\Deposit\github\computer9zo\OoO_simulation\Debug\OoO_simulation.pdb (Partial PDB)

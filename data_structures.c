@@ -60,7 +60,7 @@ void ROB_printer(const struct ROB* printed)
 		printf("%-10s", instruction_name[printed->opcode]);
 		printf("R%-5d ", printed->dest);
 		printf("%c   ", (printed->status==C)?'C':'P');
-		printf("RS%-4d", printed->rs_dest);
+		printf("RS%-4d", printed->rs_dest+1);
 	}
 	else
 		printf("                            ");
@@ -102,7 +102,7 @@ void RAT_arr_printer(const struct RAT* rat, int rat_size)
 	{
 		//레지스터 0번은 존재하지 않는 주소(상수)이므로, 1번부터 출력한다..
 		rat_idx = rat + (idx+1);
-		printf("| R%-4d : ", idx);
+		printf("| R%-4d : ", idx+1);
 		RAT_printer(rat_idx);
 		printf(" ");
 
